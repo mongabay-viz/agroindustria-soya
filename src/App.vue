@@ -1,28 +1,58 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Mapa 
+      :id='"mapa"'
+      :geojson="geojson"
+    />
+    <Serie
+      :barras_id='"serie"'
+      :datos="data_series"
+      :variables="[
+        { id: 'cultivo', nombre_colores: 'cultivo', color: 'green'},
+      ]"
+      :nombre_barra="'anio'"
+      :nombre_color="'nombre_colores'"
+      titulo_eje_y="cultivo"
+      titulo_eje_x="Año"
+    />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { mapState } from 'vuex';
+
+import Mapa from './components/Mapa.vue'
+import Serie from './components/Serie.vue'
+
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    Mapa,
+    Serie
+  },
+  data(){
+    return {
+      geojson: Object,
+      data_series:[]
+    }
+  },
+  beforeMount(){
+    this.geojson = this.$store.state.datos;
+  },
+  computed: {
+    ...mapState(["base_serie"])
+  },
+  watch: {
+    base_serie(nv){
+      this.data_series = nv;
+    },
   }
+
 }
 </script>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
 </style>
