@@ -16,6 +16,7 @@ export default{
     props: {
         id: String,
         geojson: Object,
+
     },
     data(){
         return {
@@ -29,12 +30,15 @@ export default{
         }
     },
     mounted(){
+        
+        this.variable = "adios"
         this.municipio_seleccionado = this.$store.state.municipio_seleccionado;
         this.listado_municipios = this.geojson.features.map(d => {return { 
                 "id": d.properties.id_mun,
                 "nombre": `${d.properties.nom_mun}, ${d.properties.nom_ent}`
             }
         })
+        console.log(this.listado_municipios)
 
         this.creandoMapaBase();
         this.agregandoIconos();
@@ -70,7 +74,6 @@ export default{
         },
 
         clickMarcador(datum){
-            let ef = [];
             // Con la siguiente linea, se liga el selector con los clicks en el mapa
             this.municipio_seleccionado = datum.properties.id_mun
             
@@ -78,7 +81,8 @@ export default{
         
     },
     watch:{
-        municipio_seleccionado(nv){
+        municipio_seleccionado(nv,ov){
+            console.log(nv,ov)
             if(nv != ""){
                 this.$store.commit("modificandoMunicipioSeleccionado", nv);
                 this.$store.commit("modificandoBaseSerie",
@@ -87,20 +91,20 @@ export default{
                         this.$store.state.fecha_minima, 
                         this.$store.state.fecha_maxima)
                 )
-                console.log("mute!!")
+                console.log("muté!!")
             }
         }
     }
     
 }
 
-function formateaDatos(datos,fech_min, fech_max){
-    var data_resultante = [];
+function formateaDatos(datum,fech_min, fech_max){
+    let data_resultante = [];
     for( var i = fech_min; i < fech_max + 1;i++ ){
         data_resultante.push({
             "anio": i,
-            "deforestacion": datos[i+"_deforestacion"],
-            "cultivo": datos[i+"_cultivo"],
+            "deforestacion": datum[i+"_deforestacion"],
+            "cultivo": datum[i+"_cultivo"],
         })
     }
     console.log(data_resultante)

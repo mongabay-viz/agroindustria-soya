@@ -89,7 +89,7 @@ export default {
       default: function () {
         var txt = []
         this.variables.map((d) => {
-          txt.push(`<p><span class="nomenclatura-tooltip" style="background: ${d.color}"></span>
+          txt.push(`<p><span class="nomenclatura-tooltip" style="background: ${this.$store.state.color_cultivo}"></span>
 						${d[this.nombre_color]} | <b>${this.tooltip_data_seleccionada[d.id].toLocaleString("en")}</b> 
 						</p>`)
         })
@@ -100,21 +100,19 @@ export default {
     },
   },
   watch: {
-    variables() {
-      this.configurandoDimensionesParaBarras();
-      this.creandoBarras();
-      this.actualizandoBarras();
-    },
+    
     datos() {
+      // todo esto se dispara cuando cambian los datos, i.e. seleccionamos un municipio distinto
       this.configurandoDimensionesParaBarras();
       this.creandoBarras();
+      this.creandoSerie();
       this.actualizandoBarras();
+      this.actualizandoSerie();;
     }
   },
 
   data() {
     return {
-      width: 200,
       ancho_leyenda_y: 0
     }
   },
@@ -135,7 +133,9 @@ export default {
     this.configurandoDimensionesParaSVG();
     this.configurandoDimensionesParaBarras();
     this.creandoBarras();
+    this.creandoSerie();
     this.actualizandoBarras();
+    this.actualizandoSerie();;
 
     window.addEventListener("resize", this.reescalandoPantalla)
 
@@ -169,20 +169,22 @@ export default {
     },
 
     configurandoDimensionesParaBarras() {
-
       this.data_apilada = d3.stack()
-          .keys(this.variables.map(d => d.id))(this.datos)
-      for (let i = 0; i < this.variables.length; i++) {
+          .keys(["cultivo"])(this.datos)
+      for (let i = 0; i < ["cultivo"].length; i++) {
         this.data_apilada[i].forEach(d => {
           d.data = Object.assign({}, d.data, {"key": this.data_apilada[i].key})
         })
       }
+        /// En este caso de gráfico necesito saber cual es mi valor más alto en cultivo y deforestación, para saber
+        /// hasta donde llega y
 
+        var y_max = d3.max(this.datos.map(d => d3.max([d.cultivo, d.deforestacion])))
         this.escalaY = d3.scaleLinear()
-            .domain([0, d3.max(this.datos.map(d => d3.sum(this.variables.map(dd => d[dd.id]))))])
+            .domain([0, y_max])
             .range([this.alto, 0]);
         this.escalaX = d3.scaleBand()
-            .domain(this.datos.map(d => d[this.nombre_barra]))
+            .domain(this.datos.map(d => d.anio))
             .range([0, this.ancho])
             .padding(this.espaciado_barras)
 
@@ -198,6 +200,8 @@ export default {
             .attr("transform", `translate(${0}, ${this.alto})`)
         this.eje_x.select("path").remove()
         this.eje_x.selectAll("line").remove()
+
+
       
     },
     creandoBarras() {
@@ -209,7 +213,7 @@ export default {
           .enter()
           .append("g")
           .attr("class", (d) => `${d.key} g-rects`)
-          .style("fill", (d, i) => this.variables[i].color)
+          .style("fill", this.$store.state.color_cultivo)
 
       this.barras_individuales = this.barras_apiladas
           .selectAll("rect")
@@ -226,19 +230,59 @@ export default {
       }
 
     },
+    creandoSerie(){
+
+      //Esta funcion es nueva en este caso
+      this.grupo_contenedor.selectAll(".linea").remove();
+      this.serie_linea = this.grupo_contenedor
+        .selectAll(".linea")
+        .data([this.datos])//// Checa como aqui metemos un arreglo con un elemento this.datos, porque queremos que nos genere una sola linea, a diferencia de los marcadores en el siguiente comentario
+        .enter()
+        .append("path")
+        .attr("class","linea")
+
+      this.grupo_contenedor.selectAll(".marcadores").remove();
+      this.marcadores = this.grupo_contenedor
+        .selectAll(".marcadores")
+        .data(this.datos) /// aquí queremos que nos genere un marcador para cada fecha, por eso metemos un elemento this.datos que tiene una longitud igual a la cantidad de años
+        .enter()
+        .append("rect")
+        .attr("class","marcadores")
+      
+    },
+  
     actualizandoBarras() {
         this.barras_individuales
-            .attr("width", this.escalaX.bandwidth)
+            .attr("width", this.escalaX.bandwidth())
             .attr("height", d => this.escalaY(d[0]) - this.escalaY(d[1]))
-            .attr("x", d => this.escalaX(d.data[this.nombre_barra]))
+            .attr("x", d => this.escalaX(d.data.anio))
             .attr("y", d => this.escalaY(d[1]))
+        
     
+    },
+    actualizandoSerie(){
+      /// y esta también es nueva
+      this.serie_linea.attr("d", 
+          d3.line()
+            .x((dd) => this.escalaX(dd.anio) + .5 * this.escalaX.bandwidth())
+            .y((dd) => this.escalaY(dd.deforestacion))  
+        )
+        .style("fill", "none")
+        .style("stroke","red")
+
+      var proporcion_marcador = .25  
+      this.marcadores
+            .attr("width", this.escalaX.bandwidth() * proporcion_marcador)
+            .attr("height", this.escalaX.bandwidth() * proporcion_marcador)
+            .attr("x", d => this.escalaX(d.anio)+ this.escalaX.bandwidth() * .5 - (.5 *proporcion_marcador * this.escalaX.bandwidth()))
+            .attr("y", d => this.escalaY(d.deforestacion) - .5 * proporcion_marcador * this.escalaX.bandwidth())
     },
 
     reescalandoPantalla() {
       this.configurandoDimensionesParaSVG();
       this.configurandoDimensionesParaBarras();
       this.actualizandoBarras();
+      this.actualizandoSerie();;
 
     },
     mostrarTooltip(evento) {
@@ -248,7 +292,7 @@ export default {
 
         if (this.tooltip_indice < this.datos.length) {
           this.tooltip_categoria = this.escalaX.domain()[this.tooltip_indice]
-          this.tooltip_data_seleccionada = this.data_apilada[0].filter(dd => (dd.data[this.nombre_barra] == this.tooltip_categoria))[0].data;
+          this.tooltip_data_seleccionada = this.data_apilada[0].filter(dd => (dd.data.anio == this.tooltip_categoria))[0].data;
 
           this.tooltip
               .style("visibility", "visible")
@@ -272,7 +316,7 @@ export default {
               .style("fill-opacity", ".2")
 
           this.barras_individuales
-              .filter(d => d.data[this.nombre_barra] == this.tooltip_categoria)
+              .filter(d => d.data.anio == this.tooltip_categoria)
               .style("fill-opacity", "1")
         }
       
@@ -298,7 +342,8 @@ svg.svg-barras {
 }
 
 svg.svg-barras::v-deep text {
-  font-family: "Montserrat";
+    font-family: "hiragino-kaku-gothic";
+
 
 }
 

@@ -9,6 +9,7 @@ export default new Vuex.Store({
     municipio_seleccionado: "04006",
     fecha_maxima: 2020,
     fecha_minima: 2010,
+    color_cultivo: "#e45efd",
     base_serie:[]
   },
   mutations: {

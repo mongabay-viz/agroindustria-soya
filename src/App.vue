@@ -4,6 +4,7 @@
     <Mapa 
       :id='"mapa"'
       :geojson="geojson"
+      
     />
     <Serie
       :barras_id='"serie"'
@@ -54,5 +55,24 @@ export default {
 </script>
 
 <style lang="scss">
+  @font-face {
+  font-family: "hiragino-kaku-gothic";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("~@/assets/fonts/Heisei Kaku Gothic Std W3.otf");
+}
+@font-face {
+  font-family: "hiragino-kaku-gothic";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("~@/assets/fonts/Heisei Kaku Gothic Std W5.otf");
+}
 
+#app {
+  font-family: "hiragino-kaku-gothic";
+  color: #000;
+
+}
 </style>
