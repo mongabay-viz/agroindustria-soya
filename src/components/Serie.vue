@@ -57,7 +57,7 @@ export default {
     titulo_eje_x: String,
     ancho_tooltip: {
       type: Number,
-      default: 195
+      default: 334
     },
     margen: {
       type: Object,
@@ -87,33 +87,38 @@ export default {
     textoTooltip: {
       type: Function,
       default: function () {
-        var txt = []
-        this.variables.map((d) => {
-          txt.push(`<p><span class="nomenclatura-tooltip" style="background: ${this.$store.state.color_cultivo}"></span>
-						${d[this.nombre_color]} | <b>${this.tooltip_data_seleccionada[d.id].toLocaleString("en")}</b> 
-						</p>`)
-        })
+        
+        let texto = `
+        <div>
+          <p>Año: <b>${this.tooltip_categoria}</b></p>
+          <p>Cultivo: <b>${this.$store.state.nombre_cultivo.toLowerCase()}</b></p>
+          <p>Estado: <b>${this.tooltip_data_seleccionada.estado}</b></p>
+          <p>Municipio: <b>${this.tooltip_data_seleccionada.municipio}</b></p>
+          <p><span class="nomen-ha-cultivo" style="background: ${this.$store.state.color_cultivo}"></span> Hectáreas de cultivo: <b>${this.tooltip_data_seleccionada.cultivo.toLocaleString("en")}</b></p>
+          <p><span class="nomen-ha-perdida-arborea" style="background: ${this.$store.state.color_linea_serie}"></span> Hectáreas de perdida arbórea: <b>${this.tooltip_data_seleccionada.deforestacion.toLocaleString("en")}</b></p>
+        </div>
+        `
 
-        return `<p>${this.tooltip_categoria}</p>
-						${txt.reverse().join(" ")}`
+        return texto
       }
     },
   },
   watch: {
     
-    datos() {
+    datos(nv, ov) {
       // todo esto se dispara cuando cambian los datos, i.e. seleccionamos un municipio distinto
       this.configurandoDimensionesParaBarras();
-      this.creandoBarras();
-      this.creandoSerie();
-      this.actualizandoBarras();
-      this.actualizandoSerie();;
+      
+      if(ov.length==0)this.creando();
+      
+      this.actualizando();
     }
   },
 
   data() {
     return {
-      ancho_leyenda_y: 0
+      ancho_leyenda_y: 0,
+      tiempo_transicion: 500,
     }
   },
   mounted() {
@@ -131,11 +136,9 @@ export default {
 
     this.tooltip = d3.select(`#${this.barras_id} .tooltip`);
     this.configurandoDimensionesParaSVG();
-    this.configurandoDimensionesParaBarras();
-    this.creandoBarras();
-    this.creandoSerie();
-    this.actualizandoBarras();
-    this.actualizandoSerie();;
+    //this.configurandoDimensionesParaBarras();
+    //this.creando();
+    //this.actualizando();
 
     window.addEventListener("resize", this.reescalandoPantalla)
 
@@ -156,7 +159,15 @@ export default {
           .attr("width", this.ancho + this.margen.derecha + this.margen.izquierda)
           .attr("height", this.alto + this.margen.arriba + this.margen.abajo)
           .style("left", this.ancho_leyenda_y + "px");
-
+      
+      
+      this.svg.append("text")
+        .text("Ha")
+        .attr("x", this.margen.arriba)
+        .attr("y",this.margen.izquierda -6)
+        .style("dominant-baseline","auto")
+        .style("text-anchor","end")
+        .style("font-size","14")
       this.grupo_contenedor
           .attr("transform", `translate(${this.margen.izquierda},${this.margen.arriba})`)
 
@@ -204,22 +215,27 @@ export default {
 
       
     },
+    creando(){
+      this.creandoBarras();
+      this.creandoSerie();
+    },
+    actualizando(){
+      this.actualizandoBarras();
+      this.actualizandoSerie();
+    },
     creandoBarras() {
       this.grupo_contenedor.selectAll(".g-rects").remove();
+      console.log(this.datos)
 
-      this.barras_apiladas = this.grupo_contenedor
-          .selectAll(".g-rects")
-          .data(this.data_apilada)
-          .enter()
-          .append("g")
-          .attr("class", (d) => `${d.key} g-rects`)
-          .style("fill", this.$store.state.color_cultivo)
+      this.barras_individuales = this.grupo_contenedor
+        .selectAll("rects")
+        .data(this.datos)
+        .enter()
+        .append("rect")
+        .attr("class","rects")
+        .style("fill", this.$store.state.color_cultivo)
 
-      this.barras_individuales = this.barras_apiladas
-          .selectAll("rect")
-          .data((d) => d)
-          .enter()
-          .append("rect")
+
 
       if (this.tooltip_activo) {
         this.svg
@@ -253,29 +269,42 @@ export default {
   
     actualizandoBarras() {
         this.barras_individuales
+            .data(this.datos)
+            .transition()
+            .duration(this.tiempo_transicion)
             .attr("width", this.escalaX.bandwidth())
-            .attr("height", d => this.escalaY(d[0]) - this.escalaY(d[1]))
-            .attr("x", d => this.escalaX(d.data.anio))
-            .attr("y", d => this.escalaY(d[1]))
+            .attr("height", d => this.escalaY(0) - this.escalaY(d.cultivo))
+            .attr("x", d => this.escalaX(d.anio))
+            .attr("y", d => this.escalaY(d.cultivo))
         
     
     },
     actualizandoSerie(){
       /// y esta también es nueva
-      this.serie_linea.attr("d", 
+      this.serie_linea
+        .data([this.datos])
+            .transition()
+            .duration(this.tiempo_transicion)
+        .attr("d", 
           d3.line()
             .x((dd) => this.escalaX(dd.anio) + .5 * this.escalaX.bandwidth())
             .y((dd) => this.escalaY(dd.deforestacion))  
         )
         .style("fill", "none")
-        .style("stroke","red")
+        .style("stroke",this.$store.state.color_linea_serie)
+        .style("stroke-width","2px")
 
-      var proporcion_marcador = .25  
+      var proporcion_marcador = .2 
       this.marcadores
-            .attr("width", this.escalaX.bandwidth() * proporcion_marcador)
-            .attr("height", this.escalaX.bandwidth() * proporcion_marcador)
-            .attr("x", d => this.escalaX(d.anio)+ this.escalaX.bandwidth() * .5 - (.5 *proporcion_marcador * this.escalaX.bandwidth()))
-            .attr("y", d => this.escalaY(d.deforestacion) - .5 * proporcion_marcador * this.escalaX.bandwidth())
+        .data(this.datos)
+        .attr("width", this.escalaX.bandwidth() * proporcion_marcador)
+        .attr("height", this.escalaX.bandwidth() * proporcion_marcador)
+        
+        .transition()
+        .duration(this.tiempo_transicion)
+        .attr("x", d => this.escalaX(d.anio)+ this.escalaX.bandwidth() * .5 - (.5 *proporcion_marcador * this.escalaX.bandwidth()))
+        .attr("y", d => this.escalaY(d.deforestacion) - .5 * proporcion_marcador * this.escalaX.bandwidth())
+        .style("fill",this.$store.state.color_linea_serie)
     },
 
     reescalandoPantalla() {
@@ -292,8 +321,7 @@ export default {
 
         if (this.tooltip_indice < this.datos.length) {
           this.tooltip_categoria = this.escalaX.domain()[this.tooltip_indice]
-          this.tooltip_data_seleccionada = this.data_apilada[0].filter(dd => (dd.data.anio == this.tooltip_categoria))[0].data;
-
+          this.tooltip_data_seleccionada = this.datos.filter(dd => (dd.anio == this.tooltip_categoria))[0];
           this.tooltip
               .style("visibility", "visible")
               .style("left", evento.layerX > .5 * (this.ancho + this.margen.izquierda + this.margen.derecha) ? `${evento.layerX - this.ancho_tooltip + this.ancho_leyenda_y - 20}px` : `${evento.layerX + this.ancho_leyenda_y + 20}px`)
@@ -302,7 +330,7 @@ export default {
               .style("height", "30px")
 
           let contenido_tooltip = this.tooltip.select(".tooltip-contenido")
-              .style("background", "rgba(0, 0, 0,.8)")
+              .style("background", this.$store.state.background_tooltip)
               .style("min-width", this.ancho_tooltip + "px")
               .style("border-radius", "8px")
               .style("width", this.ancho_tooltip + "px")
@@ -313,10 +341,10 @@ export default {
               .html(this.textoTooltip())
 
           this.barras_individuales
-              .style("fill-opacity", ".2")
+              .style("fill-opacity", ".5")
 
           this.barras_individuales
-              .filter(d => d.data.anio == this.tooltip_categoria)
+              .filter(d => d.anio == this.tooltip_categoria)
               .style("fill-opacity", "1")
         }
       
@@ -392,14 +420,23 @@ div.contenedor-tooltip-svg {
     padding-bottom: 5px;
 
     p {
-      margin: 3px;
-
-      span.nomenclatura-tooltip {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        border: solid 1px rgba(255, 255, 255, .7);
+      margin: 0px;
+      line-height: 1.4;
+      font-size:16px;
+      span{
+        position: relative;
         display: inline-block;
+      }
+      span.nomen-ha-cultivo{
+        width: 20px;
+        height: 14px;
+        border-radius: 4px;
+        transform: translate(0, 2px);
+      }
+      span.nomen-ha-perdida-arborea{
+        width: 20px;
+        height: 2px;
+        transform: translate(0, -5px);
       }
     }
 

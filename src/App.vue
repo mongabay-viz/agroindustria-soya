@@ -12,10 +12,12 @@
       :variables="[
         { id: 'cultivo', nombre_colores: 'cultivo', color: 'green'},
       ]"
+      :margen="{'arriba': 40, 'abajo': 20, 'izquierda': 50, 'derecha': 20}"
       :nombre_barra="'anio'"
       :nombre_color="'nombre_colores'"
-      titulo_eje_y="cultivo"
-      titulo_eje_x="Año"
+      :alto_vis="400"
+      :espaciado_barras=".2"
+      ref="mi_serie_temporal"
     />
   </div>
 </template>

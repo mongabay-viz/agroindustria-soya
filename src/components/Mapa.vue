@@ -10,7 +10,8 @@
 </template>
 <script>
 import * as L from 'leaflet';
-
+import * as d3 from "d3";
+import "@/../node_modules/leaflet.tilelayer.colorfilter/src/leaflet-tilelayer-colorfilter.js"
 export default{
     name: "Mapa",
     props: {
@@ -24,9 +25,14 @@ export default{
             municipio_seleccionado:"",
             icono: L.icon({
                 iconUrl: require('@/assets/img/marcador.svg'),
-                iconSize: [50, 50],
-                iconAnchor: [25, 50],
+                iconSize: [20, 30],
+                iconAnchor: [10, 30],
             }),
+            des_icono: L.icon({
+                iconUrl: require('@/assets/img/desmarcador.svg'),
+                iconSize: [20, 30],
+                iconAnchor: [10, 30],
+            })
         }
     },
     mounted(){
@@ -38,7 +44,6 @@ export default{
                 "nombre": `${d.properties.nom_mun}, ${d.properties.nom_ent}`
             }
         })
-        console.log(this.listado_municipios)
 
         this.creandoMapaBase();
         this.agregandoIconos();
@@ -48,41 +53,74 @@ export default{
         creandoMapaBase(){
             // Este elemento popup es la caja de texto provicional que saldrá al dar click a los elementos  
             this.popup = L.popup();
-            // Creamos un objeto mapa y lo agregamos al contenedor
-            this.mapa = L.map(this.id).setView([23, -103], 5);
+            // Creamos un objeto mapa y lo agregamos al contenedor, el setview lo comenté porque encontré como ajustar el mapa a las coordenadas 
+            this.mapa = L.map(this.id) //.setView([23, -103], 5);
 
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 15,
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            let filtro = ['invert:100%',
+                "contrast:100%",
+                "opacity:50%",
+                "bright:1000%"]
+
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
             })
             .addTo(this.mapa);
+            L.tileLayer.colorFilter('https://stamen-tiles-{s}.a.ssl.fastly.net/toner-hybrid/{z}/{x}/{y}{r}.{ext}', {
+                attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                subdomains: 'abcd',
+                minZoom: 0,
+                filter:filtro,
+
+                ext: 'png'
+            }).addTo(this.mapa);
         },
 
         agregandoIconos(){
-            L.geoJSON(this.geojson,{
+            this.marcadores = L.geoJSON(this.geojson,{
                 pointToLayer: (feature, latlng) => {
-                    return L.marker(latlng, {
-                        icon: this.icono
-                    });
+                    console.log(feature, latlng)
+                    switch(feature.properties.id_mun ){
+                        case this.municipio_seleccionado: 
+                            return L.marker(latlng, {
+                                icon: L.icon({
+                                    iconUrl: require('@/assets/img/marcador.svg'),
+                                    iconSize: [20, 30],
+                                    iconAnchor: [10, 30],
+                                    className: "id"+feature.properties.id_mun
+                                }),
+                            });
+                            
+                        default:
+                            return L.marker(latlng, {
+                                icon: L.icon({
+                                    iconUrl: require('@/assets/img/desmarcador.svg'),
+                                    iconSize: [20, 30],
+                                    iconAnchor: [10, 30],
+                                    className: "id"+feature.properties.id_mun
+                                }),
+                            });
+                    }
+                    
                 },
                 onEachFeature: (feature, layer) => {
                     layer.on("click",(d) => this.clickMarcador(feature) )
                 }
             })
             .addTo(this.mapa)
+            //Encontré esta linea para ajustar el mapa a nuestras coordenadas
+            this.mapa.fitBounds(this.marcadores.getBounds());
         },
 
         clickMarcador(datum){
             // Con la siguiente linea, se liga el selector con los clicks en el mapa
             this.municipio_seleccionado = datum.properties.id_mun
+            this.marcadores
             
         }
         
     },
     watch:{
         municipio_seleccionado(nv,ov){
-            console.log(nv,ov)
             if(nv != ""){
                 this.$store.commit("modificandoMunicipioSeleccionado", nv);
                 this.$store.commit("modificandoBaseSerie",
@@ -91,11 +129,17 @@ export default{
                         this.$store.state.fecha_minima, 
                         this.$store.state.fecha_maxima)
                 )
-                console.log("muté!!")
+                d3.selectAll("img.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive")
+                    .attr("src",require('@/assets/img/desmarcador.svg'))
+                
+                d3.selectAll("img.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive.id"+nv)
+
+                    .attr("src",require('@/assets/img/marcador.svg'))
+
+                console.log(this.marcadores);
             }
         }
     }
-    
 }
 
 function formateaDatos(datum,fech_min, fech_max){
@@ -105,9 +149,10 @@ function formateaDatos(datum,fech_min, fech_max){
             "anio": i,
             "deforestacion": datum[i+"_deforestacion"],
             "cultivo": datum[i+"_cultivo"],
+            "estado": datum.nom_ent,
+            "municipio": datum.nom_mun,
         })
     }
-    console.log(data_resultante)
     return data_resultante
 
 }
