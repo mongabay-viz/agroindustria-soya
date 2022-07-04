@@ -1,5 +1,5 @@
 <template>
-  <div v-bind:id=barras_id class="contenedor-barras">
+  <div v-bind:id="barras_id" class="contenedor-barras">
     <slot name="encabezado"></slot>
     <div class="contenedor-tooltip-svg">
       <div class="tooltip">
@@ -16,7 +16,7 @@
         <div class="rotation-wrapper-inner">
           <div :style="{width: `${alto_vis - margen.arriba - margen.abajo}px`,
                     transform: `rotate(-90deg)translateX(calc(-100% - ${.5 * margen.arriba}px))`}" class="element-to-rotate">
-            <p style="padding:10px 0 5px 0" v-html="titulo_eje_y"></p>
+            <p class= "titulo-eje-y" style="padding:10px 0 5px 0" v-html="titulo_eje_y"></p>
           </div>
         </div>
       </div>
@@ -68,7 +68,7 @@ export default {
     alto_vis: {
       type: Number,
       default: function () {
-        return 250
+        return 434
       }
     },
     espaciado_barras: {
@@ -92,8 +92,8 @@ export default {
         <div>
           <p>Año: <b>${this.tooltip_categoria}</b></p>
           <p>Cultivo: <b>${this.$store.state.nombre_cultivo.toLowerCase()}</b></p>
-          <p>Estado: <b>${this.tooltip_data_seleccionada.estado}</b></p>
-          <p>Municipio: <b>${this.tooltip_data_seleccionada.municipio}</b></p>
+          <p>Estado: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.estado : ""}</b></p>
+          <p>Municipio: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.municipio : ""}</b></p>
           <p><span class="nomen-ha-cultivo" style="background: ${this.$store.state.color_cultivo}"></span> Hectáreas de cultivo: <b>${this.tooltip_data_seleccionada.cultivo.toLocaleString("en")}</b></p>
           <p><span class="nomen-ha-perdida-arborea" style="background: ${this.$store.state.color_linea_serie}"></span> Hectáreas de perdida arbórea: <b>${this.tooltip_data_seleccionada.deforestacion.toLocaleString("en")}</b></p>
         </div>
@@ -108,7 +108,6 @@ export default {
     datos(nv, ov) {
       // todo esto se dispara cuando cambian los datos, i.e. seleccionamos un municipio distinto
       this.configurandoDimensionesParaBarras();
-      
       if(ov.length==0)this.creando();
       
       this.actualizando();
@@ -130,9 +129,19 @@ export default {
     this.eje_y = this.grupo_contenedor
         .append("g")
         .attr("class", "eje-y")
+        .style("color", "#4E4D33")
+        .style("font-size", "12px")
+        .style("letter-spacing", "1.07px")
+        .style("text-align", "right")
+
+
     this.eje_x = this.grupo_contenedor
         .append("g")
         .attr("class", "eje-x")
+        .style("color", "#4E4D33")
+        .style("font-size", "12px")
+        .style("letter-spacing", "1.07px")
+        .style("text-align", "center")
 
     this.tooltip = d3.select(`#${this.barras_id} .tooltip`);
     this.configurandoDimensionesParaSVG();
@@ -205,7 +214,7 @@ export default {
         this.eje_y.selectAll("line")
             .attr("x1", this.ancho)
             .style("stroke-dasharray", "3 2")
-            .style("stroke", "#707070")
+            .style("stroke", "#4E4D36")
 
         this.eje_x.call(d3.axisBottom(this.escalaX))
             .attr("transform", `translate(${0}, ${this.alto})`)
@@ -335,7 +344,16 @@ export default {
               .style("border-radius", "8px")
               .style("width", this.ancho_tooltip + "px")
               .attr("height", 70)
-              .style("padding", "0 3px 0 10px")
+              //.style("min-width", this.ancho_tooltip + "px")
+              //.style("width", this.ancho_tooltip + "px")
+              //.style("padding", "0 3px 0 10px")
+              .style("height", "143px")
+              //.style("width", "314px")
+              .style("border-radius", "5px")
+              .style("padding", "10px")
+              .style("font-size", "16px")
+              .style("letter-spacing","0.32px")
+              .style("color", "#FFFFFF")
 
           contenido_tooltip.select("div.tooltip-cifras")
               .html(this.textoTooltip())
@@ -355,6 +373,7 @@ export default {
           .style("visibility", "hidden");
       this.barras_individuales
           .style("fill-opacity", "1")
+          //.style("fill", "#D4DB9B")
 
     },
 
@@ -367,7 +386,10 @@ $border-radius-tarjeta: 10px;
 svg.svg-barras {
   position: absolute;
   top: 0;
+  width: 739px;
+  height: 434px;
 }
+
 
 svg.svg-barras::v-deep text {
     font-family: "hiragino-kaku-gothic";
@@ -377,6 +399,8 @@ svg.svg-barras::v-deep text {
 
 div.contenedor-tooltip-svg {
   position: relative;
+  width: 739px;
+  height: 434px;
 
   .rotation-wrapper-outer {
     display: table;
@@ -397,18 +421,27 @@ div.contenedor-tooltip-svg {
     }
   }
 
+
   div.eje-x {
     position: relative;
     width: 100%;
     text-align: center;
-    font-size: 12px;
-    text-align: center;
+    font-size: 14px;
     font-weight: 600;
+    letter-spacing: 1.25px;
+    color: #4E4D33;
+  }
+
+  .titulo-eje-y{
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1.25px; 
+    color: #4E4D33;
   }
 
 
   div.tooltip {
-    color: #fff;
+    color: #FFFFFF;;
     font-size: 12px;
     position: absolute;
     z-index: 2;
