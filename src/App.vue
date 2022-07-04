@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
+    <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
     <Mapa 
       :id='"mapa"'
       :geojson="geojson"
@@ -54,5 +54,8 @@ export default {
 </script>
 
 <style lang="scss">
-
+#app {
+  margin-left: 40px;
+  display: flex;
+}
 </style>

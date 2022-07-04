@@ -1,5 +1,6 @@
 <template>
     <div>
+        <p class="municipio">Municipio</p>
         <select name="municipios" id="selector_municipal" v-model="municipio_seleccionado">
             <option :value="municipio.id" v-for="municipio in listado_municipios" :key="municipio.id">{{municipio.nombre}}</option>
         </select>
@@ -38,6 +39,7 @@ export default{
 
         this.creandoMapaBase();
         this.agregandoIconos();
+        
 
     },
     methods: {
@@ -73,6 +75,7 @@ export default{
             let ef = [];
             // Con la siguiente linea, se liga el selector con los clicks en el mapa
             this.municipio_seleccionado = datum.properties.id_mun
+
             
         }
         
@@ -113,7 +116,31 @@ function formateaDatos(datos,fech_min, fech_max){
 @import "~leaflet/dist/leaflet.css";
 
 .mapa{
-    width: 100%;
-    height: 600px;
+    width: 522px;
+    height: 396px;
+    margin-top: 10px;
+}
+
+.municipio{
+    font-size: 14px;
+    letter-spacing: 1.25px;
+    color: #4E4D33;
+    margin: 3px;
+    margin-bottom: 0px;
+}
+
+#selector_municipal {
+    width: 522px;
+    height: 36px;
+    margin-top: 5px;
+    padding-left: 16px;
+    border-color:#4E4D33;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0px;
+    color: #4E4D33;
+    font-size: 14px;
+    font-weight: bold;
+    opacity: 1;
 }
 </style>

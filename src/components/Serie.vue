@@ -16,7 +16,7 @@
         <div class="rotation-wrapper-inner">
           <div :style="{width: `${alto_vis - margen.arriba - margen.abajo}px`,
                     transform: `rotate(-90deg)translateX(calc(-100% - ${.5 * margen.arriba}px))`}" class="element-to-rotate">
-            <p style="padding:10px 0 5px 0" v-html="titulo_eje_y"></p>
+            <p class= "titulo-eje-y" style="padding:10px 0 5px 0" v-html="titulo_eje_y"></p>
           </div>
         </div>
       </div>
@@ -68,7 +68,7 @@ export default {
     alto_vis: {
       type: Number,
       default: function () {
-        return 250
+        return 434
       }
     },
     espaciado_barras: {
@@ -127,9 +127,19 @@ export default {
     this.eje_y = this.grupo_contenedor
         .append("g")
         .attr("class", "eje-y")
+        .style("color", "#4E4D33")
+        .style("font-size", "12px")
+        .style("letter-spacing", "1.07px")
+        .style("text-align", "right")
+
+
     this.eje_x = this.grupo_contenedor
         .append("g")
         .attr("class", "eje-x")
+        .style("color", "#4E4D33")
+        .style("font-size", "12px")
+        .style("letter-spacing", "1.07px")
+        .style("text-align", "center")
 
     this.tooltip = d3.select(`#${this.barras_id} .tooltip`);
     this.configurandoDimensionesParaSVG();
@@ -192,7 +202,7 @@ export default {
         this.eje_y.selectAll("line")
             .attr("x1", this.ancho)
             .style("stroke-dasharray", "3 2")
-            .style("stroke", "#707070")
+            .style("stroke", "#4E4D36")
 
         this.eje_x.call(d3.axisBottom(this.escalaX))
             .attr("transform", `translate(${0}, ${this.alto})`)
@@ -216,6 +226,7 @@ export default {
           .data((d) => d)
           .enter()
           .append("rect")
+          .style("fill", "#D4DB9B")
 
       if (this.tooltip_activo) {
         this.svg
@@ -258,22 +269,31 @@ export default {
               .style("height", "30px")
 
           let contenido_tooltip = this.tooltip.select(".tooltip-contenido")
-              .style("background", "rgba(0, 0, 0,.8)")
-              .style("min-width", this.ancho_tooltip + "px")
-              .style("border-radius", "8px")
-              .style("width", this.ancho_tooltip + "px")
               .attr("height", 70)
-              .style("padding", "0 3px 0 10px")
+              //.style("min-width", this.ancho_tooltip + "px")
+              //.style("width", this.ancho_tooltip + "px")
+              //.style("padding", "0 3px 0 10px")
+              .style("height", "143px")
+              .style("width", "314px")
+              .style("background", "rgba(0, 0, 0,.8)")
+              .style("border-radius", "5px")
+              .style("opacity", "0.8")
+              .style("padding", "10px")
+              .style("font-size", "16px")
+              .style("letter-spacing","0.32px")
+              .style("color", "#FFFFFF")
 
           contenido_tooltip.select("div.tooltip-cifras")
               .html(this.textoTooltip())
 
-          this.barras_individuales
-              .style("fill-opacity", ".2")
+          // this.barras_individuales
+          //     .style("fill-opacity", ".2")
 
           this.barras_individuales
               .filter(d => d.data[this.nombre_barra] == this.tooltip_categoria)
-              .style("fill-opacity", "1")
+              .style("fill", "#A9B739")
+              //.style("fill-opacity", "1")
+
         }
       
       
@@ -282,7 +302,8 @@ export default {
       this.tooltip
           .style("visibility", "hidden");
       this.barras_individuales
-          .style("fill-opacity", "1")
+          //.style("fill-opacity", "1")
+          .style("fill", "#D4DB9B")
 
     },
 
@@ -295,15 +316,21 @@ $border-radius-tarjeta: 10px;
 svg.svg-barras {
   position: absolute;
   top: 0;
+  width: 739px;
+  height: 434px;
 }
+
 
 svg.svg-barras::v-deep text {
   font-family: "Montserrat";
-
+  width: 100%;
+  height: 100%;
 }
 
 div.contenedor-tooltip-svg {
   position: relative;
+  width: 739px;
+  height: 434px;
 
   .rotation-wrapper-outer {
     display: table;
@@ -324,18 +351,27 @@ div.contenedor-tooltip-svg {
     }
   }
 
+
   div.eje-x {
     position: relative;
     width: 100%;
     text-align: center;
-    font-size: 12px;
-    text-align: center;
+    font-size: 14px;
     font-weight: 600;
+    letter-spacing: 1.25px;
+    color: #4E4D33;
+  }
+
+  .titulo-eje-y{
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1.25px; 
+    color: #4E4D33;
   }
 
 
   div.tooltip {
-    color: #fff;
+    color: #FFFFFF;;
     font-size: 12px;
     position: absolute;
     z-index: 2;
