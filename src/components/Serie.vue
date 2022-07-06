@@ -381,26 +381,21 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 $border-radius-tarjeta: 10px;
 svg.svg-barras {
   position: absolute;
   top: 0;
-  width: 739px;
-  height: 434px;
 }
 
 
 svg.svg-barras::v-deep text {
     font-family: "hiragino-kaku-gothic";
-
-
 }
+
 
 div.contenedor-tooltip-svg {
   position: relative;
-  width: 739px;
-  height: 434px;
 
   .rotation-wrapper-outer {
     display: table;

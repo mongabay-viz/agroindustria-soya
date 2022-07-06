@@ -1,15 +1,15 @@
 <template>
-    <div>
-        <p class="municipio">Municipio</p>
-        <select name="municipios" id="selector_municipal" v-model="municipio_seleccionado">
-            <option :value="municipio.id" v-for="municipio in listado_municipios" :key="municipio.id">{{municipio.nombre}}</option>
-        </select>
+    <div class="contenedor-mapa">
+        
         <div class="mapa" :id="id">
             
         </div>
     </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
+
+
 import * as L from 'leaflet';
 import * as d3 from "d3";
 import "@/../node_modules/leaflet.tilelayer.colorfilter/src/leaflet-tilelayer-colorfilter.js"
@@ -23,7 +23,7 @@ export default{
     data(){
         return {
             listado_municipios:[],
-            municipio_seleccionado:"",
+            municipio_seleccionado_mapa:"",
             icono: L.icon({
                 iconUrl: require('@/assets/img/marcador.svg'),
                 iconSize: [20, 30],
@@ -39,12 +39,14 @@ export default{
     mounted(){
         
         this.variable = "adios"
-        this.municipio_seleccionado = this.$store.state.municipio_seleccionado;
+        this.municipio_seleccionado_mapa = this.$store.state.municipio_seleccionado;
         this.listado_municipios = this.geojson.features.map(d => {return { 
                 "id": d.properties.id_mun,
                 "nombre": `${d.properties.nom_mun}, ${d.properties.nom_ent}`
             }
         })
+
+        this.$store.commit("modificandoListadoMunicipiosSoya", this.listado_municipios)
 
         this.creandoMapaBase();
         this.agregandoIconos();
@@ -82,7 +84,7 @@ export default{
                 pointToLayer: (feature, latlng) => {
                     console.log(feature, latlng)
                     switch(feature.properties.id_mun ){
-                        case this.municipio_seleccionado: 
+                        case this.municipio_seleccionado_mapa: 
                             return L.marker(latlng, {
                                 icon: L.icon({
                                     iconUrl: require('@/assets/img/marcador.svg'),
@@ -115,13 +117,13 @@ export default{
 
         clickMarcador(datum){
             // Con la siguiente linea, se liga el selector con los clicks en el mapa
-            this.municipio_seleccionado = datum.properties.id_mun
+            this.municipio_seleccionado_mapa = datum.properties.id_mun
             
         }
         
     },
     watch:{
-        municipio_seleccionado(nv,ov){
+        municipio_seleccionado_mapa(nv,ov){
             if(nv != ""){
                 this.$store.commit("modificandoMunicipioSeleccionado", nv);
                 this.$store.commit("modificandoBaseSerie",
@@ -134,12 +136,30 @@ export default{
                     .attr("src",require('@/assets/img/desmarcador.svg'))
                 
                 d3.selectAll("img.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive.id"+nv)
-
                     .attr("src",require('@/assets/img/marcador.svg'))
 
                 console.log(this.marcadores);
             }
+        },
+        regresaMunicipioSeleccionado(nv){
+            this.$store.commit("modificandoBaseSerie",
+                formateaDatos(
+                    this.geojson.features.filter((d) => d.properties.id_mun == nv)[0].properties, 
+                    this.$store.state.fecha_minima, 
+                    this.$store.state.fecha_maxima)
+            )
+            d3.selectAll("img.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive")
+                .attr("src",require('@/assets/img/desmarcador.svg'))
+            
+            d3.selectAll("img.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive.id"+nv)
+                .attr("src",require('@/assets/img/marcador.svg'))
+            console.log("estoy leyendo cambios en store")
+
+
         }
+    },
+    computed:{
+        ...mapGetters(["regresaMunicipioSeleccionado"])
     }
 }
 
@@ -163,7 +183,6 @@ function formateaDatos(datum,fech_min, fech_max){
 @import "~leaflet/dist/leaflet.css";
 
 .mapa{
-    width: 522px;
     height: 396px;
     margin-top: 10px;
 }
@@ -176,18 +195,5 @@ function formateaDatos(datum,fech_min, fech_max){
     margin-bottom: 0px;
 }
 
-#selector_municipal {
-    width: 522px;
-    height: 36px;
-    margin-top: 5px;
-    padding-left: 16px;
-    border-color:#4E4D33;
-    border-radius: 5px;
-    text-transform: uppercase;
-    letter-spacing: 0px;
-    color: #4E4D33;
-    font-size: 14px;
-    font-weight: bold;
-    opacity: 1;
-}
+
 </style>

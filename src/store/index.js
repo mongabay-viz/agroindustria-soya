@@ -13,7 +13,8 @@ export default new Vuex.Store({
     color_cultivo: "#A9B739",
     color_linea_serie:"#ED2626",
     background_tooltip: "rgba(34, 33, 0,.8)",
-    base_serie:[]
+    base_serie:[],
+    listado_municipios_soya: []
   },
   mutations: {
     modificandoMunicipioSeleccionado(state, valor){
@@ -22,7 +23,15 @@ export default new Vuex.Store({
     modificandoBaseSerie(state, valor){
       state.base_serie = valor;
     },
+    modificandoListadoMunicipiosSoya(state, valor){
+      state.listado_municipios_soya = valor;
+    },
 
+  },
+  getters: {
+    regresaMunicipioSeleccionado: (state) => {
+      return state.municipio_seleccionado
+    }
   },
   actions: {
   },

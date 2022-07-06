@@ -1,0 +1,13 @@
+<svg id="ver_barras" data-name="ver barras" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+  <g id="Grupo_299" data-name="Grupo 299" transform="translate(0.189)">
+    <g id="Rectangle" transform="translate(-0.189)" fill="none" stroke="#4e4d36" stroke-width="1">
+      <rect width="36" height="36" rx="4" stroke="none"/>
+      <rect x="0.5" y="0.5" width="35" height="35" rx="3.5" fill="none"/>
+    </g>
+  </g>
+  <g id="Grupo_423" data-name="Grupo 423" transform="translate(-20.811 -146)">
+    <rect id="Rectángulo_1868" data-name="Rectángulo 1868" width="8" height="24" transform="translate(25.811 152)" fill="#4e4d33"/>
+    <rect id="Rectángulo_1869" data-name="Rectángulo 1869" width="8" height="18" transform="translate(34.811 158)" fill="#4e4d33"/>
+    <rect id="Rectángulo_1870" data-name="Rectángulo 1870" width="8" height="12" transform="translate(43.811 164)" fill="#4e4d33"/>
+  </g>
+</svg>
