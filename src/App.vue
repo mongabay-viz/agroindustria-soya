@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <p class="titulo">Municipios de <span> {{$store.state.listado_estados_soya}}</span> donde se detecta deforestación y pérdida arbórea por cultivo de <span>{{$store.state.nombre_cultivo}}</span> en los últimos 10 años</p>
     <p class="municipio">Municipio</p>
     <div class="controles">
       <select name="municipios" id="selector_municipal" v-model="$store.state.municipio_seleccionado">
@@ -103,17 +104,47 @@ export default {
   font-family: "hiragino-kaku-gothic";
   color: #000;
   max-width: 1366px;
-  margin: 0 auto;
+  margin: 20px 40px;
+  @media (max-width: 768px) {
+    margin: 20px 21px;
+  }
+
+  .titulo{
+    margin: 0;
+    width: 64%;
+    line-height: 120%;
+    font-size: 21px;
+    text-align: justify;
+    letter-spacing: 0px;
+    color: #222100;
+    @media (max-width: 768px) {
+      font-size: 18px;
+      width: 100%
+    }
+
+    span {
+      font-weight: bolder;
+    }
+  }
+
   .municipio{
     font-size: 14px;
     letter-spacing: 1.25px;
     color: #4E4D33;
-    margin: 3px;
+    margin-top: 24px;
     margin-bottom: 0px;
+    @media (max-width: 768px) {
+      margin-top: 16px;
+    }
   }
   .controles{
+    margin-right: 24px;
+    margin-top: 6px;
+    margin-bottom: 16px;
     @media (max-width: 768px) {
+      padding-right: 20px;
       display: flex;
+      gap: 8px;
     }
     .oculto-en-escritorio{
       display: none;
@@ -122,17 +153,14 @@ export default {
         border: none;
         padding: 0;
         background: none;
+        height: 36px;
       }
     }
     #selector_municipal {
       width: 46%;
-       @media (max-width: 768px) {
-        width: 100%;
-      }
-
       height: 36px;
-      margin-top: 5px;
       padding-left: 16px;
+
       border-color:#4E4D33;
       border-radius: 5px;
       text-transform: uppercase;
@@ -141,10 +169,15 @@ export default {
       font-size: 14px;
       font-weight: bold;
       opacity: 1;
+      @media (max-width: 768px) {
+        width: 100%;
+        font-size: 12px;
+      }
     }
   }
   .contenedor-graficos{
     display: flex;
+    margin: 0px;
       @media (max-width: 768px) {
       //position: absolute;
       display: block;
@@ -153,17 +186,21 @@ export default {
     div.contenedor-barras{
       width: 54%;
       background: #fff;
+
       @media (max-width: 768px) {
         width: 100%;
+        height: 100%;
         position:absolute;
       }
 
     }
     .contenedor-mapa{
       background: #fff;
-        width: 46%;
-        @media (max-width: 768px) {
-        width:100%;
+      width: 46%;
+      margin-right: 24px;
+      @media (max-width: 768px) {
+        width:90%;
+        padding-right: 50px;
         position:absolute;
       }
     }

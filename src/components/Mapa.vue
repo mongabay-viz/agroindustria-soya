@@ -23,6 +23,7 @@ export default{
     data(){
         return {
             listado_municipios:[],
+            listado_estados: [],
             municipio_seleccionado_mapa:"",
             icono: L.icon({
                 iconUrl: require('@/assets/img/marcador.svg'),
@@ -50,6 +51,9 @@ export default{
 
         this.creandoMapaBase();
         this.agregandoIconos();
+
+        this.listado_estados = this.geojson.features.map(d => {return  `${d.properties.nom_ent}`})
+        this.$store.commit("modificandoListadoEstadosSoya", [...new Set(this.listado_estados)].join(", "));
         
 
     },
@@ -82,7 +86,7 @@ export default{
         agregandoIconos(){
             this.marcadores = L.geoJSON(this.geojson,{
                 pointToLayer: (feature, latlng) => {
-                    console.log(feature, latlng)
+                    //console.log(feature, latlng)
                     switch(feature.properties.id_mun ){
                         case this.municipio_seleccionado_mapa: 
                             return L.marker(latlng, {
@@ -138,7 +142,7 @@ export default{
                 d3.selectAll("img.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive.id"+nv)
                     .attr("src",require('@/assets/img/marcador.svg'))
 
-                console.log(this.marcadores);
+                //console.log(this.marcadores);
             }
         },
         regresaMunicipioSeleccionado(nv){
@@ -153,7 +157,7 @@ export default{
             
             d3.selectAll("img.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive.id"+nv)
                 .attr("src",require('@/assets/img/marcador.svg'))
-            console.log("estoy leyendo cambios en store")
+            //console.log("estoy leyendo cambios en store")
 
 
         }

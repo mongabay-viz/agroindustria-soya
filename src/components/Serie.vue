@@ -177,6 +177,11 @@ export default {
         .style("dominant-baseline","auto")
         .style("text-anchor","end")
         .style("font-size","14")
+        .style("font-size","12px")
+        .style("fill", "#4E4D33")
+        .style("letter-spacing", "1.07px")
+        .style("text-align", "right")
+        
       this.grupo_contenedor
           .attr("transform", `translate(${this.margen.izquierda},${this.margen.arriba})`)
 
@@ -234,7 +239,7 @@ export default {
     },
     creandoBarras() {
       this.grupo_contenedor.selectAll(".g-rects").remove();
-      console.log(this.datos)
+      //console.log(this.datos)
 
       this.barras_individuales = this.grupo_contenedor
         .selectAll("rects")
