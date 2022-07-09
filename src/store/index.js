@@ -15,7 +15,7 @@ export default new Vuex.Store({
     background_tooltip: "rgba(34, 33, 0,.8)",
     base_serie:[],
     listado_municipios_soya: [],
-    listado_estados_soya: "",
+    listado_estados_soya: [],
   },
   mutations: {
     modificandoMunicipioSeleccionado(state, valor){
@@ -30,7 +30,6 @@ export default new Vuex.Store({
     modificandoListadoEstadosSoya(state, value){
       state.listado_estados_soya = value;
     }
-
   },
   getters: {
     regresaMunicipioSeleccionado: (state) => {

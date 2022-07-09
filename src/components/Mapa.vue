@@ -53,7 +53,7 @@ export default{
         this.agregandoIconos();
 
         this.listado_estados = this.geojson.features.map(d => {return  `${d.properties.nom_ent}`})
-        this.$store.commit("modificandoListadoEstadosSoya", [...new Set(this.listado_estados)].join(", "));
+        this.$store.commit("modificandoListadoEstadosSoya", [...new Set(this.listado_estados)]);
         
 
     },

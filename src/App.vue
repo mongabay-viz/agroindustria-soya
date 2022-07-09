@@ -1,6 +1,10 @@
 <template>
   <div id="app">
-    <p class="titulo">Municipios de <span> {{$store.state.listado_estados_soya}}</span> donde se detecta deforestación y pérdida arbórea por cultivo de <span>{{$store.state.nombre_cultivo}}</span> en los últimos 10 años</p>
+    <p class="titulo">Municipios de 
+      <span v-for="(estado, index) in $store.state.listado_estados_soya" :key="estado.id"> 
+        <span v-if="index != 0 && index != $store.state.listado_estados_soya.length - 1">,</span> 
+        <span v-if="index == $store.state.listado_estados_soya.length - 1"> y</span>
+        {{estado}}</span> donde se detecta deforestación y pérdida arbórea por cultivo de <span>{{$store.state.nombre_cultivo}}</span> en los últimos 10 años</p>
     <p class="municipio">Municipio</p>
     <div class="controles">
       <select name="municipios" id="selector_municipal" v-model="$store.state.municipio_seleccionado">
