@@ -6,6 +6,25 @@
     
   </div>
 </template>
+<script>
+
+export default {
+  name: "App",
+  mounted(){
+      console.log(this.$route.name)
+
+    if(this.$route.name == "soya"){
+      this.$store.commit("modificandoMunicipioSeleccionado", "04006");
+
+    }
+    else if(this.$route.name == "cania"){
+      this.$store.commit("modificandoMunicipioSeleccionado", "23010");
+
+    }
+  }
+}
+</script>
+
 
 
 <style lang="scss">

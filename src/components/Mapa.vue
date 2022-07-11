@@ -41,20 +41,20 @@ export default{
     mounted(){
         
         this.variable = "adios"
-        this.municipio_seleccionado_mapa = this.$store.state['municipio_seleccionado_'+this.cultivo];
+        this.municipio_seleccionado_mapa = this.$store.state['municipio_seleccionado'];
         this.listado_municipios = this.geojson.features.map(d => {return { 
                 "id": d.properties.id_mun,
                 "nombre": `${d.properties.nom_mun}, ${d.properties.nom_ent}`
             }
         })
 
-        this.$store.commit("modificandoListadoMunicipiosSoya", this.listado_municipios)
+        this.$store.commit("modificandoListadoMunicipios"+this.cultivo.charAt(0).toUpperCase() + this.cultivo.slice(1), this.listado_municipios)
 
         this.creandoMapaBase();
         this.agregandoIconos();
 
         this.listado_estados = this.geojson.features.map(d => {return  `${d.properties.nom_ent}`})
-        this.$store.commit("modificandoListadoEstadosSoya", [...new Set(this.listado_estados)]);
+        this.$store.commit("modificandoListadoEstados"+this.cultivo.charAt(0).toUpperCase() + this.cultivo.slice(1), [...new Set(this.listado_estados)]);
         
 
     },
@@ -130,8 +130,8 @@ export default{
     watch:{
         municipio_seleccionado_mapa(nv,ov){
             if(nv != ""){
-                this.$store.commit("modificandoMunicipioSeleccionadoSoya", nv);
-                this.$store.commit("modificandoBaseSerieSoya",
+                this.$store.commit("modificandoMunicipioSeleccionado", nv);
+                this.$store.commit("modificandoBaseSerie"+this.cultivo.charAt(0).toUpperCase() + this.cultivo.slice(1),
                     formateaDatos(
                         this.geojson.features.filter((d) => d.properties.id_mun == nv)[0].properties, 
                         this.$store.state['fecha_minima_'+this.cultivo], 
@@ -146,8 +146,8 @@ export default{
                 //console.log(this.marcadores);
             }
         },
-        regresaMunicipioSeleccionadoSoya(nv){
-            this.$store.commit("modificandoBaseSerieSoya",
+        regresaMunicipioSeleccionado(nv){
+            this.$store.commit("modificandoBaseSerie"+this.cultivo.charAt(0).toUpperCase() + this.cultivo.slice(1),
                 formateaDatos(
                     this.geojson.features.filter((d) => d.properties.id_mun == nv)[0].properties, 
                     this.$store.state['fecha_minima_'+this.cultivo], 
@@ -164,7 +164,7 @@ export default{
         }
     },
     computed:{
-        ...mapGetters(["regresaMunicipioSeleccionadoSoya"])
+        ...mapGetters(["regresaMunicipioSeleccionado"])
     }
 }
 

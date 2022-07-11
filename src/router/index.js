@@ -2,14 +2,21 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 
 import Soya from '../views/Soya.vue'
+import Cania from '../views/Cania.vue'
+
 Vue.use(VueRouter)
 
 
 const routes = [
     {
       path: '/soya',
-      name: 'Soya',
+      name: 'soya',
       component: Soya
+    },
+    {
+      path: '/cania',
+      name: 'cania',
+      component: Cania
     },
 ]
 
