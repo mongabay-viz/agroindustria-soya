@@ -1,28 +1,29 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import datos from "@/assets/data/soya.json";
+import datos_soya from "@/assets/data/soya.json";
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    datos: datos,
-    nombre_cultivo:"Soya",
-    municipio_seleccionado: "04006",
-    fecha_maxima: 2020,
-    fecha_minima: 2010,
-    color_cultivo: "#A9B739",
-    color_linea_serie:"#ED2626",
     background_tooltip: "rgba(34, 33, 0,.8)",
-    base_serie:[],
+    color_linea_serie:"#ED2626",
+    /// Soya
+    datos_soya: datos_soya,
+    nombre_cultivo_soya:"Soya",
+    municipio_seleccionado_soya: "04006",
+    fecha_maxima_soya: 2020,
+    fecha_minima_soya: 2010,
+    color_cultivo_soya: "#A9B739",
+    base_serie_soya:[],
     listado_municipios_soya: [],
     listado_estados_soya: [],
   },
   mutations: {
-    modificandoMunicipioSeleccionado(state, valor){
-      state.municipio_seleccionado = valor;
+    modificandoMunicipioSeleccionadoSoya(state, valor){
+      state.municipio_seleccionado_soya = valor;
     },
-    modificandoBaseSerie(state, valor){
-      state.base_serie = valor;
+    modificandoBaseSerieSoya(state, valor){
+      state.base_serie_soya = valor;
     },
     modificandoListadoMunicipiosSoya(state, valor){
       state.listado_municipios_soya = valor;
@@ -32,8 +33,8 @@ export default new Vuex.Store({
     }
   },
   getters: {
-    regresaMunicipioSeleccionado: (state) => {
-      return state.municipio_seleccionado
+    regresaMunicipioSeleccionadoSoya: (state) => {
+      return state.municipio_seleccionado_soya
     }
   },
   actions: {

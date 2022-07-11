@@ -18,6 +18,7 @@ export default{
     props: {
         id: String,
         geojson: Object,
+        cultivo: String
 
     },
     data(){
@@ -40,7 +41,7 @@ export default{
     mounted(){
         
         this.variable = "adios"
-        this.municipio_seleccionado_mapa = this.$store.state.municipio_seleccionado;
+        this.municipio_seleccionado_mapa = this.$store.state['municipio_seleccionado_'+this.cultivo];
         this.listado_municipios = this.geojson.features.map(d => {return { 
                 "id": d.properties.id_mun,
                 "nombre": `${d.properties.nom_mun}, ${d.properties.nom_ent}`
@@ -129,12 +130,12 @@ export default{
     watch:{
         municipio_seleccionado_mapa(nv,ov){
             if(nv != ""){
-                this.$store.commit("modificandoMunicipioSeleccionado", nv);
-                this.$store.commit("modificandoBaseSerie",
+                this.$store.commit("modificandoMunicipioSeleccionadoSoya", nv);
+                this.$store.commit("modificandoBaseSerieSoya",
                     formateaDatos(
                         this.geojson.features.filter((d) => d.properties.id_mun == nv)[0].properties, 
-                        this.$store.state.fecha_minima, 
-                        this.$store.state.fecha_maxima)
+                        this.$store.state['fecha_minima_'+this.cultivo], 
+                        this.$store.state["fecha_maxima_"+ this.cultivo])
                 )
                 d3.selectAll("img.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive")
                     .attr("src",require('@/assets/img/desmarcador.svg'))
@@ -145,12 +146,12 @@ export default{
                 //console.log(this.marcadores);
             }
         },
-        regresaMunicipioSeleccionado(nv){
-            this.$store.commit("modificandoBaseSerie",
+        regresaMunicipioSeleccionadoSoya(nv){
+            this.$store.commit("modificandoBaseSerieSoya",
                 formateaDatos(
                     this.geojson.features.filter((d) => d.properties.id_mun == nv)[0].properties, 
-                    this.$store.state.fecha_minima, 
-                    this.$store.state.fecha_maxima)
+                    this.$store.state['fecha_minima_'+this.cultivo], 
+                    this.$store.state['fecha_maxima_'+this.cultivo])
             )
             d3.selectAll("img.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive")
                 .attr("src",require('@/assets/img/desmarcador.svg'))
@@ -163,7 +164,7 @@ export default{
         }
     },
     computed:{
-        ...mapGetters(["regresaMunicipioSeleccionado"])
+        ...mapGetters(["regresaMunicipioSeleccionadoSoya"])
     }
 }
 

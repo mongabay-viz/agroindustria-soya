@@ -33,7 +33,7 @@
     </div>
     <slot name="pie">
       <div class="pie">
-        <p><span class="nomen-ha-cultivo" :style="{background: $store.state.color_cultivo}"></span> Hectáreas de cultivo</p>
+        <p><span class="nomen-ha-cultivo" :style="{background: $store.state['color_cultivo_'+cultivo]}"></span> Hectáreas de cultivo</p>
         <p><span class="nomen-ha-perdida-arborea" :style="{background: $store.state.color_linea_serie}"></span> Hectáreas de perdida arbórea</p>
       </div>
       
@@ -43,6 +43,7 @@
 
 <script>
 import * as d3 from "d3";
+import { stringify } from "querystring";
 
 export default {
   name: 'DadsigBarras',
@@ -55,7 +56,10 @@ export default {
         return []
       }
     },
-
+    cultivo: {
+      default:function(){return "soya"},
+      type: String
+    },
     nombre_barra: String,
     nombre_color: String,
     titulo_eje_y: String,
@@ -96,10 +100,10 @@ export default {
         let texto = `
         <div>
           <p>Año: <b>${this.tooltip_categoria}</b></p>
-          <p>Cultivo: <b>${this.$store.state.nombre_cultivo.toLowerCase()}</b></p>
+          <p>Cultivo: <b>${this.$store.state['nombre_cultivo_'+ this.cultivo].toLowerCase()}</b></p>
           <p>Estado: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.estado : ""}</b></p>
           <p>Municipio: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.municipio : ""}</b></p>
-          <p><span class="nomen-ha-cultivo" style="background: ${this.$store.state.color_cultivo}"></span> Hectáreas de cultivo: <b>${this.tooltip_data_seleccionada.cultivo.toLocaleString("en")}</b></p>
+          <p><span class="nomen-ha-cultivo" style="background: ${this.$store.state['color_cultivo_'+ this.cultivo]}"></span> Hectáreas de cultivo: <b>${this.tooltip_data_seleccionada.cultivo.toLocaleString("en")}</b></p>
           <p><span class="nomen-ha-perdida-arborea" style="background: ${this.$store.state.color_linea_serie}"></span> Hectáreas de perdida arbórea: <b>${this.tooltip_data_seleccionada.deforestacion.toLocaleString("en")}</b></p>
         </div>
         `
@@ -255,7 +259,7 @@ export default {
         .enter()
         .append("rect")
         .attr("class","rects")
-        .style("fill", this.$store.state.color_cultivo)
+        .style("fill", this.$store.state['color_cultivo_'+this.cultivo])
 
 
 
