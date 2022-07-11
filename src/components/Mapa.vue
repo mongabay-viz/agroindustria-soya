@@ -187,7 +187,7 @@ function formateaDatos(datum,fech_min, fech_max){
 @import "~leaflet/dist/leaflet.css";
 
 .mapa{
-    height: 396px;
+    height: 100%;
     margin-top: 10px;
 }
 
