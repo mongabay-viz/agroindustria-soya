@@ -146,6 +146,7 @@ body{
       @media (max-width: 768px) {
         width: calc(100% - 42px);
         position:absolute;
+        height: 442px;
       }
     }
   }

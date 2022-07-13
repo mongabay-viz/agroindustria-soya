@@ -439,7 +439,10 @@ svg.svg-barras::v-deep text {
 div.contenedor-tooltip-svg {
   
   position: relative;
-  width: calc(100% -80px) ;
+  width: calc(100% - 80px) ;
+  @media (max-width: 768px) {
+      width: 100%
+    }
   overflow-x: scroll;
   overflow-y: hidden;
   padding-bottom: 10px;
