@@ -14,7 +14,7 @@ export default new Vuex.Store({
     /// Soya
     datos_soya: datos_soya,
     nombre_cultivo_soya:"Soya",
-    fecha_maxima_soya: 2020,
+    fecha_maxima_soya: 2021,
     fecha_minima_soya: 2010,
     color_cultivo_soya: "#A9B739",
     base_serie_soya:[],
