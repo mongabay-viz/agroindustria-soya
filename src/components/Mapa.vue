@@ -18,6 +18,7 @@ export default{
     props: {
         id: String,
         geojson: Object,
+        cultivo: String
 
     },
     data(){
@@ -40,20 +41,20 @@ export default{
     mounted(){
         
         this.variable = "adios"
-        this.municipio_seleccionado_mapa = this.$store.state.municipio_seleccionado;
+        this.municipio_seleccionado_mapa = this.$store.state['municipio_seleccionado'];
         this.listado_municipios = this.geojson.features.map(d => {return { 
                 "id": d.properties.id_mun,
                 "nombre": `${d.properties.nom_mun}, ${d.properties.nom_ent}`
             }
         })
 
-        this.$store.commit("modificandoListadoMunicipiosSoya", this.listado_municipios)
+        this.$store.commit("modificandoListadoMunicipios"+this.cultivo.charAt(0).toUpperCase() + this.cultivo.slice(1), this.listado_municipios)
 
         this.creandoMapaBase();
         this.agregandoIconos();
 
         this.listado_estados = this.geojson.features.map(d => {return  `${d.properties.nom_ent}`})
-        this.$store.commit("modificandoListadoEstadosSoya", [...new Set(this.listado_estados)]);
+        this.$store.commit("modificandoListadoEstados"+this.cultivo.charAt(0).toUpperCase() + this.cultivo.slice(1), [...new Set(this.listado_estados)]);
         
 
     },
@@ -130,11 +131,11 @@ export default{
         municipio_seleccionado_mapa(nv,ov){
             if(nv != ""){
                 this.$store.commit("modificandoMunicipioSeleccionado", nv);
-                this.$store.commit("modificandoBaseSerie",
+                this.$store.commit("modificandoBaseSerie"+this.cultivo.charAt(0).toUpperCase() + this.cultivo.slice(1),
                     formateaDatos(
                         this.geojson.features.filter((d) => d.properties.id_mun == nv)[0].properties, 
-                        this.$store.state.fecha_minima, 
-                        this.$store.state.fecha_maxima)
+                        this.$store.state['fecha_minima_'+this.cultivo], 
+                        this.$store.state["fecha_maxima_"+ this.cultivo])
                 )
                 d3.selectAll("img.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive")
                     .attr("src",require('@/assets/img/desmarcador.svg'))
@@ -146,11 +147,11 @@ export default{
             }
         },
         regresaMunicipioSeleccionado(nv){
-            this.$store.commit("modificandoBaseSerie",
+            this.$store.commit("modificandoBaseSerie"+this.cultivo.charAt(0).toUpperCase() + this.cultivo.slice(1),
                 formateaDatos(
                     this.geojson.features.filter((d) => d.properties.id_mun == nv)[0].properties, 
-                    this.$store.state.fecha_minima, 
-                    this.$store.state.fecha_maxima)
+                    this.$store.state['fecha_minima_'+this.cultivo], 
+                    this.$store.state['fecha_maxima_'+this.cultivo])
             )
             d3.selectAll("img.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive")
                 .attr("src",require('@/assets/img/desmarcador.svg'))
@@ -187,7 +188,7 @@ function formateaDatos(datum,fech_min, fech_max){
 @import "~leaflet/dist/leaflet.css";
 
 .mapa{
-    height: 396px;
+    height: 100%;
     margin-top: 10px;
 }
 

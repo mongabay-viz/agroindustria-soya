@@ -16,7 +16,6 @@
         <div class="rotation-wrapper-inner">
           <div :style="{width: `${alto_vis - margen.arriba - margen.abajo}px`,
                     transform: `rotate(-90deg)translateX(calc(-100% - ${.5 * margen.arriba}px))`}" class="element-to-rotate">
-            <p class= "titulo-eje-y" style="padding:10px 0 5px 0" v-html="titulo_eje_y"></p>
           </div>
         </div>
       </div>
@@ -28,16 +27,23 @@
       </svg>
       <div class="eje-x">
         <p :style="{
-                    padding: `${margen.abajo +10 }px ${margen.derecha}px 0 ${margen.izquierda + ancho_leyenda_y}px `
-                }" v-html="titulo_eje_x"></p>
+          padding: `${margen.abajo +10 }px ${margen.derecha}px 0 ${margen.izquierda + ancho_leyenda_y}px `
+        }" v-html="titulo_eje_x"></p>
       </div>
     </div>
-    <slot name="pie"></slot>
+    <slot name="pie">
+      <div class="pie">
+        <p><span class="nomen-ha-cultivo" :style="{background: $store.state['color_cultivo_'+cultivo]}"></span> Hectáreas de cultivo</p>
+        <p><span class="nomen-ha-perdida-arborea" :style="{background: $store.state.color_linea_serie}"></span> Hectáreas de perdida arbórea</p>
+      </div>
+      
+    </slot>
   </div>
 </template>
 
 <script>
 import * as d3 from "d3";
+import { stringify } from "querystring";
 
 export default {
   name: 'DadsigBarras',
@@ -50,7 +56,10 @@ export default {
         return []
       }
     },
-
+    cultivo: {
+      default:function(){return "soya"},
+      type: String
+    },
     nombre_barra: String,
     nombre_color: String,
     titulo_eje_y: String,
@@ -91,10 +100,10 @@ export default {
         let texto = `
         <div>
           <p>Año: <b>${this.tooltip_categoria}</b></p>
-          <p>Cultivo: <b>${this.$store.state.nombre_cultivo.toLowerCase()}</b></p>
+          <p>Cultivo: <b>${this.$store.state['nombre_cultivo_'+ this.cultivo].toLowerCase()}</b></p>
           <p>Estado: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.estado : ""}</b></p>
           <p>Municipio: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.municipio : ""}</b></p>
-          <p><span class="nomen-ha-cultivo" style="background: ${this.$store.state.color_cultivo}"></span> Hectáreas de cultivo: <b>${this.tooltip_data_seleccionada.cultivo.toLocaleString("en")}</b></p>
+          <p><span class="nomen-ha-cultivo" style="background: ${this.$store.state['color_cultivo_'+ this.cultivo]}"></span> Hectáreas de cultivo: <b>${this.tooltip_data_seleccionada.cultivo.toLocaleString("en")}</b></p>
           <p><span class="nomen-ha-perdida-arborea" style="background: ${this.$store.state.color_linea_serie}"></span> Hectáreas de perdida arbórea: <b>${this.tooltip_data_seleccionada.deforestacion.toLocaleString("en")}</b></p>
         </div>
         `
@@ -160,8 +169,12 @@ export default {
     configurandoDimensionesParaSVG() {
       this.ancho_leyenda_y = document.querySelector(`#${this.barras_id} .rotation-wrapper-outer .element-to-rotate`)
           .clientHeight;
-
-      this.ancho = document.querySelector(`#${this.barras_id}`).clientWidth - this.margen.derecha - this.margen.izquierda - this.ancho_leyenda_y
+      if(window.innerWidth > 768){
+        this.ancho = document.querySelector(`#${this.barras_id}`).clientWidth - this.margen.derecha - this.margen.izquierda - this.ancho_leyenda_y
+      }
+      else {
+        this.ancho = 768
+      }
       this.alto = this.alto_vis - this.margen.arriba - this.margen.abajo;
 
       this.svg
@@ -172,9 +185,8 @@ export default {
       
       this.svg.append("text")
         .text("Ha")
-        .attr("x", this.margen.arriba)
-        .attr("y",this.margen.izquierda -6)
-        .style("dominant-baseline","auto")
+        .attr("x", this.margen.izquierda - 8)
+        .attr("y",this.margen.arriba - 12)
         .style("text-anchor","end")
         .style("font-size","14")
         .style("font-size","12px")
@@ -247,7 +259,7 @@ export default {
         .enter()
         .append("rect")
         .attr("class","rects")
-        .style("fill", this.$store.state.color_cultivo)
+        .style("fill", this.$store.state['color_cultivo_'+this.cultivo])
 
 
 
@@ -331,7 +343,7 @@ export default {
     mostrarTooltip(evento) {
       // TODO: volter esto layerX y this.escalaX.step();
         this.tooltip_bandas = this.escalaX.step();
-        this.tooltip_indice = parseInt((evento.layerX - this.margen.izquierda - this.margen.derecha) / this.tooltip_bandas)
+        this.tooltip_indice = parseInt((evento.layerX - this.margen.izquierda ) / this.tooltip_bandas)
 
         if (this.tooltip_indice < this.datos.length) {
           this.tooltip_categoria = this.escalaX.domain()[this.tooltip_indice]
@@ -352,7 +364,7 @@ export default {
               //.style("min-width", this.ancho_tooltip + "px")
               //.style("width", this.ancho_tooltip + "px")
               //.style("padding", "0 3px 0 10px")
-              .style("height", "143px")
+              //.style("height", "143px")
               //.style("width", "314px")
               .style("border-radius", "5px")
               .style("padding", "10px")
@@ -387,10 +399,12 @@ export default {
 </script>
 
 <style lang="scss">
+
 $border-radius-tarjeta: 10px;
 svg.svg-barras {
   position: absolute;
   top: 0;
+  background : #fff;
 }
 
 
@@ -398,9 +412,40 @@ svg.svg-barras::v-deep text {
     font-family: "hiragino-kaku-gothic";
 }
 
+.pie{
+     p{margin: 0px;
+      line-height: 1.4;
+      font-size:16px;
+        padding-left: 10px;
 
+      span{
+        position: relative;
+        display: inline-block;
+      }
+      span.nomen-ha-cultivo{
+        width: 20px;
+        height: 14px;
+        border-radius: 4px;
+        transform: translate(0, 2px);
+      }
+      span.nomen-ha-perdida-arborea{
+        width: 20px;
+        height: 2px;
+        transform: translate(0, -5px);
+      }
+    }
+    
+  }
 div.contenedor-tooltip-svg {
+  
   position: relative;
+  width: calc(100% - 80px) ;
+  @media (max-width: 768px) {
+      width: 100%
+    }
+  overflow-x: scroll;
+  overflow-y: hidden;
+  padding-bottom: 10px;
 
   .rotation-wrapper-outer {
     display: table;
@@ -436,6 +481,7 @@ div.contenedor-tooltip-svg {
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 1.25px; 
+    height:0;
     color: #4E4D33;
   }
 
@@ -448,8 +494,7 @@ div.contenedor-tooltip-svg {
     visibility: hidden;
   }
 
-  div.tooltip::v-deep
-  div.tooltip-cifras {
+  div.tooltip div.tooltip-cifras {
     padding-bottom: 5px;
 
     p {

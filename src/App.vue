@@ -1,92 +1,31 @@
 <template>
   <div id="app">
-    <p class="titulo">Municipios de 
-      <span v-for="(estado, index) in $store.state.listado_estados_soya" :key="estado.id"> 
-        <span v-if="index != 0 && index != $store.state.listado_estados_soya.length - 1">,</span> 
-        <span v-if="index == $store.state.listado_estados_soya.length - 1"> y</span>
-        {{estado}}</span> donde se detecta deforestación y pérdida arbórea por cultivo de <span>{{$store.state.nombre_cultivo}}</span> en los últimos 10 años</p>
-    <p class="municipio">Municipio</p>
-    <div class="controles">
-      <select name="municipios" id="selector_municipal" v-model="$store.state.municipio_seleccionado">
-          <option :value="municipio.id" v-for="municipio in $store.state.listado_municipios_soya" :key="municipio.id">{{municipio.nombre}}</option>
-      </select>
-      <button class="oculto-en-escritorio" @click="alternarVistaMovil()">
-        <img src="@/assets/img/ver barras.svg" v-if="visible_movil=='mapa'" alt=""/>
-        <img src="@/assets/img/ver mapa.svg" v-if="visible_movil=='grafica'" alt=""/>
+    <router-view/>
 
-      </button>
-    </div>
     
-    <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
-    <div class="contenedor-graficos">
-      <Mapa 
-        :id='"mapa"'
-        :geojson="geojson"
-        :style="{'z-index':(visible_movil == 'mapa' ? '1' : '-1') }"
-        
-      />
-      <Serie
-        :barras_id='"serie"'
-        :datos="data_series"
-        :variables="[
-          { id: 'cultivo', nombre_colores: 'cultivo', color: 'green'},
-        ]"
-        :margen="{'arriba': 40, 'abajo': 20, 'izquierda': 55, 'derecha': 20}"
-        :nombre_barra="'anio'"
-        :nombre_color="'nombre_colores'"
-        :alto_vis="400"
-        :espaciado_barras=".2"
-        ref="mi_serie_temporal"
-      />
-    </div>
     
   </div>
 </template>
-
 <script>
-import { mapState } from 'vuex';
-
-import Mapa from './components/Mapa.vue'
-import Serie from './components/Serie.vue'
-
 
 export default {
-  name: 'App',
-  components: {
-    Mapa,
-    Serie
-  },
-  data(){
-    return {
-      geojson: Object,
-      data_series:[],
-      visible_movil: "mapa"
-    }
-  },
-  methods:{
-    alternarVistaMovil(){
-      if(this.visible_movil == "mapa"){
-        this.visible_movil = "grafica"
-      }
-      else{
-        this.visible_movil = "mapa"
-      }
-    }
-  },
-  beforeMount(){
-    this.geojson = this.$store.state.datos;
-  },
-  computed: {
-    ...mapState(["base_serie"])
-  },
-  watch: {
-    base_serie(nv){
-      this.data_series = nv;
-    },
-  }
+  name: "App",
+  mounted(){
+      console.log(this.$route.name)
 
+    if(this.$route.name == "soya"){
+      this.$store.commit("modificandoMunicipioSeleccionado", "04006");
+
+    }
+    else if(this.$route.name == "cania"){
+      this.$store.commit("modificandoMunicipioSeleccionado", "23010");
+
+    }
+  }
 }
 </script>
+
+
 
 <style lang="scss">
   @font-face {
@@ -103,14 +42,17 @@ export default {
   font-display: swap;
   src: url("~@/assets/fonts/Heisei Kaku Gothic Std W5.otf");
 }
-
+body{
+  margin: 0;
+}
 #app {
   font-family: "hiragino-kaku-gothic";
   color: #000;
   max-width: 1366px;
-  margin: 20px 40px;
+  margin: 20px auto;
+  padding: 0 20px;
   @media (max-width: 768px) {
-    margin: 20px 21px;
+    padding: 20px 21px;
   }
 
   .titulo{
@@ -192,7 +134,7 @@ export default {
       background: #fff;
 
       @media (max-width: 768px) {
-        width: 100%;
+        width: calc(100% - 42px);
         height: 100%;
         position:absolute;
       }
@@ -201,11 +143,10 @@ export default {
     .contenedor-mapa{
       background: #fff;
       width: 46%;
-      margin-right: 24px;
       @media (max-width: 768px) {
-        width:90%;
-        padding-right: 50px;
+        width: calc(100% - 42px);
         position:absolute;
+        height: 442px;
       }
     }
   }
