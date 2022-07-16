@@ -104,7 +104,7 @@ export default {
           <p>Estado: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.estado : ""}</b></p>
           <p>Municipio: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.municipio : ""}</b></p>
           <p><span class="nomen-ha-cultivo" style="background: ${this.$store.state['color_cultivo_'+ this.cultivo]}"></span> Hectáreas de cultivo: <b>${this.tooltip_data_seleccionada.cultivo.toLocaleString("en")}</b></p>
-          <p><span class="nomen-ha-perdida-arborea" style="background: ${this.$store.state.color_linea_serie}"></span> Hectáreas de perdida arbórea: <b>${this.tooltip_data_seleccionada.deforestacion.toLocaleString("en")}</b></p>
+          <p><span class="nomen-ha-perdida-arborea" style="background: ${this.$store.state.color_linea_serie}"></span> Hectáreas de pérdida arbórea: <b>${this.tooltip_data_seleccionada.deforestacion.toLocaleString("en")}</b></p>
         </div>
         `
 
@@ -350,10 +350,13 @@ export default {
           this.tooltip_data_seleccionada = this.datos.filter(dd => (dd.anio == this.tooltip_categoria))[0];
           this.tooltip
               .style("visibility", "visible")
-              .style("left", evento.layerX > .5 * (this.ancho + this.margen.izquierda + this.margen.derecha) ? `${evento.layerX - this.ancho_tooltip + this.ancho_leyenda_y - 20}px` : `${evento.layerX + this.ancho_leyenda_y + 20}px`)
+              //.style("left", evento.layerX > .5 * (this.ancho + this.margen.izquierda + this.margen.derecha) ? `${evento.layerX - this.ancho_tooltip + this.ancho_leyenda_y - 30}px` : `${evento.layerX + this.ancho_leyenda_y + 20}px`)
+              .style("left", (evento.layerX < .5 * this.ancho_tooltip ? 0 : 
+                evento.layerX >  this.ancho + this.margen.izquierda + this.margen.derecha - .5 * this.ancho_tooltip ? this.ancho + this.margen.izquierda - this.margen.derecha -  this.ancho_tooltip :
+                evento.layerX - .5 * this.ancho_tooltip) + "px"
+              )
+
               .style("width", this.ancho_tooltip + "px")
-              .style("top", evento.layerY + "px")
-              .style("height", "30px")
 
           let contenido_tooltip = this.tooltip.select(".tooltip-contenido")
               .style("background", this.$store.state.background_tooltip)
@@ -374,6 +377,15 @@ export default {
 
           contenido_tooltip.select("div.tooltip-cifras")
               .html(this.textoTooltip())
+          
+          let alto_tooltip = parseInt(this.tooltip.style("height"))
+          console.log((evento.layerY > .5 * alto_tooltip ? 0 : 
+                evento.layerY <  this.alto + this.margen.arriba + this.margen.abajo - .5 * alto_tooltip ? this.alto + this.margen.arriba - this.margen.abajo -  alto_tooltip :
+                evento.layerY - .5 * alto_tooltip))
+          this.tooltip
+            .style("top", (evento.layerY > this.alto + this.margen.arriba + this.margen.abajo - alto_tooltip ? evento.layerY - 20 - alto_tooltip : evento.layerY + 20 ) + "px"
+              )
+
 
           this.barras_individuales
               .style("fill-opacity", ".5")
@@ -439,7 +451,7 @@ svg.svg-barras::v-deep text {
 div.contenedor-tooltip-svg {
   
   position: relative;
-  width: calc(100% - 80px) ;
+  width: 100%;
   @media (max-width: 768px) {
       width: 100%
     }

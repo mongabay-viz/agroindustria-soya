@@ -124,6 +124,7 @@ body{
   .contenedor-graficos{
     display: flex;
     margin: 0px;
+    gap:15px;
       @media (max-width: 768px) {
       //position: absolute;
       display: block;
