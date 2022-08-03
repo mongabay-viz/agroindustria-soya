@@ -60,7 +60,7 @@ export default {
     return {
       geojson: Object,
       data_series:[],
-      visible_movil: "mapa",
+      visible_movil: "grafica",
       cultivo: "cania"
     }
   },

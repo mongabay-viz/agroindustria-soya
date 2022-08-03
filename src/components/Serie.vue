@@ -312,13 +312,16 @@ export default {
             .transition()
             .duration(this.tiempo_transicion)
         .attr("d", 
-          d3.line()
+          d3.area()
             .x((dd) => this.escalaX(dd.anio) + .5 * this.escalaX.bandwidth())
-            .y((dd) => this.escalaY(dd.deforestacion))  
+            .y0((dd) => this.escalaY(0)) 
+            .y1((dd) => this.escalaY(dd.deforestacion))  
         )
-        .style("fill", "none")
-        .style("stroke",this.$store.state.color_linea_serie)
-        .style("stroke-width","2px")
+        .style("fill", this.$store.state.color_linea_serie)
+        .style("fill-opacity", .5)
+
+        //.style("stroke",this.$store.state.color_linea_serie)
+        //.style("stroke-width","2px")
 
       var proporcion_marcador = .2 
       this.marcadores
@@ -344,8 +347,7 @@ export default {
       // TODO: volter esto layerX y this.escalaX.step();
         this.tooltip_bandas = this.escalaX.step();
         this.tooltip_indice = parseInt((evento.layerX - this.margen.izquierda ) / this.tooltip_bandas)
-
-        if (this.tooltip_indice < this.datos.length) {
+        if (this.tooltip_indice < this.datos.length && this.tooltip_indice > -1 ) {
           this.tooltip_categoria = this.escalaX.domain()[this.tooltip_indice]
           this.tooltip_data_seleccionada = this.datos.filter(dd => (dd.anio == this.tooltip_categoria))[0];
           this.tooltip
