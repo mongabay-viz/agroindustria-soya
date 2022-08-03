@@ -21,6 +21,10 @@ export default {
       this.$store.commit("modificandoMunicipioSeleccionado", "23010");
 
     }
+    else if(this.$route.name == "sancionadas"){
+      this.$store.commit("modificandoMunicipioSeleccionado", "23010");
+
+    }
   }
 }
 </script>

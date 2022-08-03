@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 
 import Soya from '../views/Soya.vue'
 import Cania from '../views/Cania.vue'
+import Sancionadas from '../views/Sancionadas.vue'
 
 Vue.use(VueRouter)
 
@@ -17,6 +18,11 @@ const routes = [
       path: '/cania',
       name: 'cania',
       component: Cania
+    },
+    {
+      path: '/sancionadas',
+      name: 'sancionadas',
+      component: Sancionadas
     },
 ]
 
