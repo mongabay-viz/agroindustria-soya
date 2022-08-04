@@ -33,8 +33,12 @@
     </div>
     <slot name="pie">
       <div class="pie">
-        <p><span class="nomen-ha-cultivo" :style="{background: $store.state['color_cultivo_'+cultivo]}"></span> Hectáreas de cultivo</p>
-        <p><span class="nomen-ha-perdida-arborea" :style="{background: $store.state.color_linea_serie}"></span> Hectáreas de perdida arbórea</p>
+        <button :class="{activo: dato_seleccionado == 'cultivo'}">
+          <p><span class="nomen-ha-cultivo" :style="{background: $store.state['color_cultivo_'+cultivo]}"></span> Hectáreas de cultivo</p>
+        </button>
+        <button :class="{activo: dato_seleccionado == 'perdida-arborea'}">
+          <p><span class="nomen-ha-perdida-arborea" :style="{background: $store.state.color_linea_serie}"></span> Hectáreas de perdida arbórea</p>
+        </button>
       </div>
       
     </slot>
@@ -427,7 +431,8 @@ svg.svg-barras::v-deep text {
 }
 
 .pie{
-     p{margin: 0px;
+  button{
+    p{margin: 0px;
       line-height: 1.4;
       font-size:16px;
         padding-left: 10px;
@@ -438,16 +443,27 @@ svg.svg-barras::v-deep text {
       }
       span.nomen-ha-cultivo{
         width: 20px;
-        height: 14px;
+        height: 20px;
         border-radius: 4px;
         transform: translate(0, 2px);
       }
       span.nomen-ha-perdida-arborea{
         width: 20px;
-        height: 2px;
+        height: 20px;
         transform: translate(0, -5px);
       }
     }
+    &.activo{
+      span.nomen-ha-cultivo{
+
+      }
+      span.nomen-ha-perdida-arborea{
+
+      }
+
+    }
+  }
+     
     
   }
 div.contenedor-tooltip-svg {
