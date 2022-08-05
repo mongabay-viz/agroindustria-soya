@@ -154,9 +154,9 @@ body{
         width: calc(100% - 42px);
         position:absolute;
         height: 442px;
-        z-index: 1;
+        z-index: -1;
         &.visible-en-movil{
-          z-index: -1;
+          z-index: 1;
         }
       }
     }
