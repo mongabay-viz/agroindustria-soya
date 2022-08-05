@@ -21,9 +21,11 @@ export default {
       this.$store.commit("modificandoMunicipioSeleccionado", "23010");
 
     }
+    else if(this.$route.name == "palma"){
+      this.$store.commit("modificandoMunicipioSeleccionado", "04003");
+    }
     else if(this.$route.name == "sancionadas"){
       this.$store.commit("modificandoMunicipioSeleccionado", "23010");
-
     }
   }
 }
@@ -152,6 +154,10 @@ body{
         width: calc(100% - 42px);
         position:absolute;
         height: 442px;
+        z-index: -1;
+        &.visible-en-movil{
+          z-index: 1;
+        }
       }
     }
   }
