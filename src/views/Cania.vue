@@ -22,7 +22,7 @@
       <Mapa 
         :id='"mapa"'
         :geojson="geojson"
-        :style="{'z-index':(visible_movil == 'mapa' ? '1' : '-1') }"
+        :class="{'visible-movil':(visible_movil == 'mapa' ) }"
         :cultivo="cultivo"
         
       />

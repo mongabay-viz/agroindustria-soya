@@ -2,6 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import datos_soya from "@/assets/data/soya.json";
 import datos_cania from "@/assets/data/cania.json";
+import datos_palma from "@/assets/data/palma.json";
+
 
 Vue.use(Vuex)
 
@@ -29,6 +31,15 @@ export default new Vuex.Store({
     base_serie_cania:[],
     listado_municipios_cania: [],
     listado_estados_cania: [],
+    /// Palma
+    datos_palma: datos_palma,
+    nombre_cultivo_palma:"Palma",
+    fecha_maxima_palma: 2020,
+    fecha_minima_palma: 2010,
+    color_cultivo_palma: "#A9B739",
+    base_serie_palma:[],
+    listado_municipios_palma: [],
+    listado_estados_palma: [],
   },
   mutations: {
     modificandoMunicipioSeleccionado(state, valor){
@@ -52,8 +63,17 @@ export default new Vuex.Store({
     },
     modificandoListadoEstadosCania(state, value){
       state.listado_estados_cania = value;
-  
-    }
+    },
+
+    modificandoBaseSeriePalma(state, valor){
+      state.base_serie_palma = valor;
+    },
+    modificandoListadoMunicipiosPalma(state, valor){
+      state.listado_municipios_palma = valor;
+    },
+    modificandoListadoEstadosPalma(state, value){
+      state.listado_estados_palma = value;
+    },
   },
   getters: {
     regresaMunicipioSeleccionado: (state) => {

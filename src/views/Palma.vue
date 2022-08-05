@@ -61,7 +61,7 @@ export default {
       geojson: Object,
       data_series:[],
       visible_movil: "grafica",
-      cultivo: "soya"
+      cultivo: "palma"
     }
   },
   methods:{
@@ -78,10 +78,10 @@ export default {
     this.geojson = this.$store.state['datos_'+ this.cultivo];
   },
   computed: {
-    ...mapState(["base_serie_soya"])
+    ...mapState(["base_serie_palma"])
   },
   watch: {
-    base_serie_soya(nv){
+    base_serie_palma(nv){
       this.data_series = nv;
     },
   }
