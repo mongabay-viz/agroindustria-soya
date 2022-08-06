@@ -33,8 +33,12 @@
     </div>
     <slot name="pie">
       <div class="pie">
-        <p><span class="nomen-ha-cultivo" :style="{background: $store.state['color_cultivo_'+cultivo]}"></span> Hectáreas de cultivo</p>
-        <p><span class="nomen-ha-perdida-arborea" :style="{background: $store.state.color_linea_serie}"></span> Hectáreas de perdida arbórea</p>
+        <button :class="{activo: dato_seleccionado == 'cultivo'}" @click="dato_seleccionado = 'cultivo'">
+          <p><span class="nomen-ha-cultivo" :style="{background: $store.state['color_cultivo_'+cultivo]}"></span> Hectáreas de cultivo</p>
+        </button>
+        <button :class="{activo: dato_seleccionado == 'perdida-arborea'}" @click="dato_seleccionado = 'perdida-arborea'">
+          <p><span class="nomen-ha-perdida-arborea" :style="{background: $store.state.color_linea_serie}"></span> Hectáreas de perdida arbórea</p>
+        </button>
       </div>
       
     </slot>
@@ -97,16 +101,24 @@ export default {
       type: Function,
       default: function () {
         
-        let texto = `
+        let texto = this.dato_seleccionado =="cultivo" ? `
         <div>
           <p>Año: <b>${this.tooltip_categoria}</b></p>
           <p>Cultivo: <b>${this.$store.state['nombre_cultivo_'+ this.cultivo].toLowerCase()}</b></p>
           <p>Estado: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.estado : ""}</b></p>
           <p>Municipio: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.municipio : ""}</b></p>
           <p><span class="nomen-ha-cultivo" style="background: ${this.$store.state['color_cultivo_'+ this.cultivo]}"></span> Hectáreas de cultivo: <b>${this.tooltip_data_seleccionada.cultivo.toLocaleString("en")}</b></p>
+        </div>
+        ` : `
+        <div>
+          <p>Año: <b>${this.tooltip_categoria}</b></p>
+          <p>Cultivo: <b>${this.$store.state['nombre_cultivo_'+ this.cultivo].toLowerCase()}</b></p>
+          <p>Estado: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.estado : ""}</b></p>
+          <p>Municipio: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.municipio : ""}</b></p>
           <p><span class="nomen-ha-perdida-arborea" style="background: ${this.$store.state.color_linea_serie}"></span> Hectáreas de pérdida arbórea: <b>${this.tooltip_data_seleccionada.deforestacion.toLocaleString("en")}</b></p>
         </div>
         `
+
 
         return texto
       }
@@ -115,11 +127,41 @@ export default {
   watch: {
     
     datos(nv, ov) {
+      
       // todo esto se dispara cuando cambian los datos, i.e. seleccionamos un municipio distinto
       this.configurandoDimensionesParaBarras();
       if(ov.length==0)this.creando();
       
       this.actualizando();
+    },
+    dato_seleccionado(nv){
+      this.configurandoDimensionesParaBarras();
+      this.actualizando()
+      if(nv =="cultivo"){
+
+        this.barras_individuales
+          //.transition()
+          .style("fill-opacity", 1)
+        this.marcadores
+          //.transition()
+          .style("fill-opacity", 0)
+        this.serie_linea
+          //.transition()
+          .style("fill-opacity", 0);
+      }
+      else{
+        this.barras_individuales
+          //.transition()
+          .style("fill-opacity", 0)
+        this.marcadores
+          //.transition()
+          .style("fill-opacity", 1)
+        this.serie_linea
+          //.transition()
+          .style("fill-opacity", .5);
+      }
+      
+
     }
   },
 
@@ -127,6 +169,8 @@ export default {
     return {
       ancho_leyenda_y: 0,
       tiempo_transicion: 500,
+      dato_seleccionado:"cultivo"
+
     }
   },
   mounted() {
@@ -213,30 +257,40 @@ export default {
           d.data = Object.assign({}, d.data, {"key": this.data_apilada[i].key})
         })
       }
-        /// En este caso de gráfico necesito saber cual es mi valor más alto en cultivo y deforestación, para saber
-        /// hasta donde llega y
 
-        var y_max = d3.max(this.datos.map(d => d3.max([d.cultivo, d.deforestacion])))
-        this.escalaY = d3.scaleLinear()
-            .domain([0, y_max])
-            .range([this.alto, 0]);
-        this.escalaX = d3.scaleBand()
-            .domain(this.datos.map(d => d.anio))
-            .range([0, this.ancho])
-            .padding(this.espaciado_barras)
+      var y_max;
+      if(this.dato_seleccionado == "cultivo"){
+        y_max = d3.max(this.datos.map((d) => d.cultivo));
+      }
+      else{
+        y_max = d3.max(this.datos.map((d) => d.deforestacion));
+      }
+      this.escalaY = d3.scaleLinear()
+          .domain([0, y_max])
+          .range([this.alto, 0]);
+      this.escalaX = d3.scaleBand()
+          .domain(this.datos.map(d => d.anio))
+          .range([0, this.ancho])
+          .padding(this.espaciado_barras)
 
-        this.eje_y.call(d3.axisLeft(this.escalaY).ticks(4))
-        this.eje_y.select("path.domain")
-            .remove()
-        this.eje_y.selectAll("line")
-            .attr("x1", this.ancho)
-            .style("stroke-dasharray", "3 2")
-            .style("stroke", "#4E4D36")
+      this.eje_y
+        .transition()
+        .duration(500)
+        .call(d3.axisLeft(this.escalaY).ticks(4))
+      this.eje_y.select("path.domain")
+          .remove()
+      this.eje_y.selectAll("line")
+          .attr("x1", this.ancho)
+          .style("stroke-dasharray", "3 2")
+          .style("stroke", "#4E4D36")
 
-        this.eje_x.call(d3.axisBottom(this.escalaX))
-            .attr("transform", `translate(${0}, ${this.alto})`)
-        this.eje_x.select("path").remove()
-        this.eje_x.selectAll("line").remove()
+      this.eje_x
+      .transition()
+        .duration(500)
+        .call(d3.axisBottom(this.escalaX))
+          .attr("transform", `translate(${0}, ${this.alto})`)
+      this.eje_x.select("path").remove()
+      this.eje_x.selectAll("line").remove()
 
 
       
@@ -262,7 +316,6 @@ export default {
         .style("fill", this.$store.state['color_cultivo_'+this.cultivo])
 
 
-
       if (this.tooltip_activo) {
         this.svg
             .on("mousemove", (evento) => {
@@ -282,6 +335,8 @@ export default {
         .enter()
         .append("path")
         .attr("class","linea")
+        .style("fill-opacity", "0")
+
 
       this.grupo_contenedor.selectAll(".marcadores").remove();
       this.marcadores = this.grupo_contenedor
@@ -290,6 +345,8 @@ export default {
         .enter()
         .append("rect")
         .attr("class","marcadores")
+        .style("fill-opacity", "0")
+
       
     },
   
@@ -318,7 +375,6 @@ export default {
             .y1((dd) => this.escalaY(dd.deforestacion))  
         )
         .style("fill", this.$store.state.color_linea_serie)
-        .style("fill-opacity", .5)
 
         //.style("stroke",this.$store.state.color_linea_serie)
         //.style("stroke-width","2px")
@@ -381,20 +437,19 @@ export default {
               .html(this.textoTooltip())
           
           let alto_tooltip = parseInt(this.tooltip.style("height"))
-          console.log((evento.layerY > .5 * alto_tooltip ? 0 : 
-                evento.layerY <  this.alto + this.margen.arriba + this.margen.abajo - .5 * alto_tooltip ? this.alto + this.margen.arriba - this.margen.abajo -  alto_tooltip :
-                evento.layerY - .5 * alto_tooltip))
+
           this.tooltip
             .style("top", (evento.layerY > this.alto + this.margen.arriba + this.margen.abajo - alto_tooltip ? evento.layerY - 20 - alto_tooltip : evento.layerY + 20 ) + "px"
               )
 
-
-          this.barras_individuales
+          if(this.dato_seleccionado == "cultivo"){
+            this.barras_individuales
               .style("fill-opacity", ".5")
-
-          this.barras_individuales
+             this.barras_individuales
               .filter(d => d.anio == this.tooltip_categoria)
               .style("fill-opacity", "1")
+          }
+         
         }
       
       
@@ -402,9 +457,12 @@ export default {
     cerrarTooltip() {
       this.tooltip
           .style("visibility", "hidden");
-      this.barras_individuales
+      if(this.dato_seleccionado == "cultivo"){
+        this.barras_individuales
           .style("fill-opacity", "1")
           //.style("fill", "#D4DB9B")
+      }
+      
 
     },
 
@@ -427,7 +485,11 @@ svg.svg-barras::v-deep text {
 }
 
 .pie{
-     p{margin: 0px;
+  button{
+    border: none;
+    background: none;
+    border-radius: 0 ;
+    p{margin: 0px;
       line-height: 1.4;
       font-size:16px;
         padding-left: 10px;
@@ -438,16 +500,24 @@ svg.svg-barras::v-deep text {
       }
       span.nomen-ha-cultivo{
         width: 20px;
-        height: 14px;
-        border-radius: 4px;
-        transform: translate(0, 2px);
+        height: 20px;
       }
       span.nomen-ha-perdida-arborea{
         width: 20px;
-        height: 2px;
-        transform: translate(0, -5px);
+        height: 20px;
       }
     }
+    &.activo{
+      span.nomen-ha-cultivo{
+
+      }
+      span.nomen-ha-perdida-arborea{
+
+      }
+
+    }
+  }
+     
     
   }
 div.contenedor-tooltip-svg {

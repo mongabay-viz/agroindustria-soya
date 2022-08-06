@@ -377,17 +377,7 @@ svg.svg-anillos::v-deep text {
         position: relative;
         display: inline-block;
       }
-      span.nomen-ha-cultivo{
-        width: 20px;
-        height: 14px;
-        border-radius: 4px;
-        transform: translate(0, 2px);
-      }
-      span.nomen-ha-perdida-arborea{
-        width: 20px;
-        height: 2px;
-        transform: translate(0, -5px);
-      }
+      
     }
     
   }
