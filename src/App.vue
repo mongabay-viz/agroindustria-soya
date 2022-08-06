@@ -1,40 +1,31 @@
 <template>
   <div id="app">
-    <router-view/>
-
-    
-    
+    <router-view />
   </div>
 </template>
 <script>
-
 export default {
   name: "App",
-  mounted(){
-      console.log(this.$route.name)
+  mounted() {
+    console.log(this.$route.name);
 
-    if(this.$route.name == "soya"){
+    if (this.$route.name == "soya") {
       this.$store.commit("modificandoMunicipioSeleccionado", "04006");
-
-    }
-    else if(this.$route.name == "cania"){
+    } else if (this.$route.name == "cania") {
       this.$store.commit("modificandoMunicipioSeleccionado", "23010");
-
-    }
-    else if(this.$route.name == "palma"){
+    } else if (this.$route.name == "palma") {
       this.$store.commit("modificandoMunicipioSeleccionado", "04003");
-    }
-    else if(this.$route.name == "sancionadas"){
+    } else if (this.$route.name == "aguacate") {
+      this.$store.commit("modificandoMunicipioSeleccionado", "14014");
+    } else if (this.$route.name == "sancionadas") {
       this.$store.commit("modificandoMunicipioSeleccionado", "23010");
     }
-  }
-}
+  },
+};
 </script>
 
-
-
 <style lang="scss">
-  @font-face {
+@font-face {
   font-family: "hiragino-kaku-gothic";
   font-style: normal;
   font-weight: 400;
@@ -48,7 +39,7 @@ export default {
   font-display: swap;
   src: url("~@/assets/fonts/Heisei Kaku Gothic Std W5.otf");
 }
-body{
+body {
   margin: 0;
 }
 #app {
@@ -61,7 +52,7 @@ body{
     padding: 20px 21px;
   }
 
-  .titulo{
+  .titulo {
     margin: 0;
     width: 64%;
     line-height: 120%;
@@ -71,7 +62,7 @@ body{
     color: #222100;
     @media (max-width: 768px) {
       font-size: 18px;
-      width: 100%
+      width: 100%;
     }
 
     span {
@@ -79,17 +70,17 @@ body{
     }
   }
 
-  .municipio{
+  .municipio {
     font-size: 14px;
     letter-spacing: 1.25px;
-    color: #4E4D33;
+    color: #4e4d33;
     margin-top: 24px;
     margin-bottom: 0px;
     @media (max-width: 768px) {
       margin-top: 16px;
     }
   }
-  .controles{
+  .controles {
     margin-right: 24px;
     margin-top: 6px;
     margin-bottom: 16px;
@@ -98,7 +89,7 @@ body{
       display: flex;
       gap: 8px;
     }
-    .oculto-en-escritorio{
+    .oculto-en-escritorio {
       display: none;
       @media (max-width: 768px) {
         display: inline-block;
@@ -113,11 +104,11 @@ body{
       height: 36px;
       padding-left: 16px;
 
-      border-color:#4E4D33;
+      border-color: #4e4d33;
       border-radius: 5px;
       text-transform: uppercase;
       letter-spacing: 0px;
-      color: #4E4D33;
+      color: #4e4d33;
       font-size: 14px;
       font-weight: bold;
       opacity: 1;
@@ -127,40 +118,38 @@ body{
       }
     }
   }
-  .contenedor-graficos{
+  .contenedor-graficos {
     display: flex;
     margin: 0px;
-    gap:15px;
-      @media (max-width: 768px) {
+    gap: 15px;
+    @media (max-width: 768px) {
       //position: absolute;
       display: block;
       width: 100%;
     }
-    div.contenedor-barras{
+    div.contenedor-barras {
       width: 54%;
       background: #fff;
 
       @media (max-width: 768px) {
         width: calc(100% - 42px);
         height: 100%;
-        position:absolute;
+        position: absolute;
       }
-
     }
-    .contenedor-mapa{
+    .contenedor-mapa {
       background: #fff;
       width: 46%;
       @media (max-width: 768px) {
         width: calc(100% - 42px);
-        position:absolute;
+        position: absolute;
         height: 442px;
         z-index: -1;
-        &.visible-en-movil{
+        &.visible-en-movil {
           z-index: 1;
         }
       }
     }
   }
 }
-
 </style>

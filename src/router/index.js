@@ -1,42 +1,47 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import Vue from "vue";
+import VueRouter from "vue-router";
 
-import Soya from '../views/Soya.vue'
-import Cania from '../views/Cania.vue'
-import Palma from '../views/Palma.vue'
+import Soya from "../views/Soya.vue";
+import Cania from "../views/Cania.vue";
+import Palma from "../views/Palma.vue";
+import Aguacate from "../views/Aguacate.vue";
 
-import Sancionadas from '../views/Sancionadas.vue'
+import Sancionadas from "../views/Sancionadas.vue";
 
-Vue.use(VueRouter)
-
+Vue.use(VueRouter);
 
 const routes = [
-    {
-      path: '/soya',
-      name: 'soya',
-      component: Soya
-    },
-    {
-      path: '/cania',
-      name: 'cania',
-      component: Cania
-    },
-    {
-      path: '/sancionadas',
-      name: 'sancionadas',
-      component: Sancionadas
-    },
-    {
-      path: '/palma',
-      name: 'palma',
-      component: Palma
-    },
-]
+  {
+    path: "/soya",
+    name: "soya",
+    component: Soya,
+  },
+  {
+    path: "/cania",
+    name: "cania",
+    component: Cania,
+  },
+  {
+    path: "/sancionadas",
+    name: "sancionadas",
+    component: Sancionadas,
+  },
+  {
+    path: "/palma",
+    name: "palma",
+    component: Palma,
+  },
+  {
+    path: "/aguacate",
+    name: "aguacate",
+    component: Aguacate,
+  },
+];
 
 const router = new VueRouter({
-    mode: 'history',
-    base: process.env.BASE_URL,
-    routes
-  })
-  
-  export default router
+  mode: "history",
+  base: process.env.BASE_URL,
+  routes,
+});
+
+export default router;
