@@ -3,16 +3,7 @@
     <h2>{{catego_seleccionada}}, {{municipio_seleccionado}}</h2>
     <slot name="encabezado"></slot>
     <div class="contenedor-tooltip-svg">
-      <div class="tooltip">
-        <div class="tooltip-contenido">
-          <div class="contenedor-boton-cerrar">
-            <button class="boton-cerrar-tooltip" @click="cerrarTooltip">
-              &times;
-            </button>
-          </div>
-          <div class="tooltip-cifras"></div>
-        </div>
-      </div>
+
       <div class="rotation-wrapper-outer">
         <div class="rotation-wrapper-inner">
           <div :style="{width: `${alto_vis - margen.arriba - margen.abajo}px`,
@@ -59,10 +50,7 @@ export default {
     },
     titulo_eje_y: String,
     titulo_eje_x: String,
-    ancho_tooltip: {
-      type: Number,
-      default: 334
-    },
+
     margen: {
       type: Object,
       default: function () {
@@ -76,31 +64,7 @@ export default {
         return .3
       }
     },
-    tooltip_activo: {
-      type: Boolean,
-      default: function () {
-        return true
-      }
-    },
 
-    textoTooltip: {
-      type: Function,
-      default: function () {
-        
-        let texto = `
-        <div>
-          <p>Año: <b>${this.tooltip_categoria}</b></p>
-          <p>Cultivo: <b>${this.$store.state['nombre_cultivo_'+ this.cultivo].toLowerCase()}</b></p>
-          <p>Estado: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.estado : ""}</b></p>
-          <p>Municipio: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.municipio : ""}</b></p>
-          <p><span class="nomen-ha-cultivo" style="background: ${this.$store.state['color_cultivo_'+ this.cultivo]}"></span> Hectáreas de cultivo: <b>${this.tooltip_data_seleccionada.cultivo.toLocaleString("en")}</b></p>
-          <p><span class="nomen-ha-perdida-arborea" style="background: ${this.$store.state.color_linea_serie}"></span> Hectáreas de pérdida arbórea: <b>${this.tooltip_data_seleccionada.deforestacion.toLocaleString("en")}</b></p>
-        </div>
-        `
-
-        return texto
-      }
-    },
   },
   watch: {
     
@@ -150,8 +114,9 @@ export default {
 
     this.tooltip = d3.select(`#${this.anillos_id} .tooltip`);
     this.configurandoDimensionesParaSVG();
-    this.configurandoDimensionesParaAnillos();
     this.creandoAnillos();
+    this.configurandoDimensionesParaAnillos();
+
     this.actualizandoAnillos();
 
     window.addEventListener("resize", this.reescalandoPantalla)
@@ -199,33 +164,47 @@ export default {
     },
 
     configurandoDimensionesParaAnillos() {
+      this.datos.forEach((d) => {
+        d.total_sanciones = d3.sum(this.categorias_sanciones.map((dd) => +d[dd]))
+      })
       this.escalaAngular = d3.scaleLinear()
         .domain([0,100])
-        .range([0, 2 * Math.PI]);
+        .range([ 1.5 * Math.PI, 0]);
       
-      this.escalaRadial = this.escalaX = d3.scaleBand()
+      this.escalaRadial = d3.scaleBand()
         .domain(this.lista_anios)
         .range([this.ancho * .1, this.ancho * .48])
         .padding(.2)
+      var y_max = d3.max(this.datos.map(d => d.total_sanciones))
+      y_max = y_max ? y_max : 0;
+      
+      this.escalaAlturaBarras = d3.scaleLinear()
+          .domain([0, y_max])
+          .range([this.ancho * .5 - 50, 0]);
       
 
     },
     creandoAnillos() {
-      this.grupo_anillos = this.grupo_contenedor
-        .selectAll("anillos")
+      this.grupo_anios = this.grupo_contenedor
+        .selectAll("anios")
         .data(this.lista_anios)
         .enter()
         .append("g")
-
-
-      this.anillos_base = this.grupo_anillos
+      this.anillos_base = this.grupo_anios
         .append("path")
-      this.anillos = this.grupo_anillos
+      this.anillos = this.grupo_anios
         .append("path")
-      this.fecha = this.grupo_anillos
+      this.barras = this.grupo_anios
+        .append("rect")
+
+      this.fecha = this.grupo_anios
         .append("text")
         .text(d=>d)
         .style("fill","gray")
+
+      this.cifras = this.grupo_anios
+        .append("text")
+        
       
 
     },
@@ -233,19 +212,18 @@ export default {
     actualizandoAnillos() {
       this.municipio_seleccionado = this.datos[0].edo_municipio_
 
-      this.datos.forEach((d) => {
-        d.total_sanciones = d3.sum(this.categorias_sanciones.map((dd) => +d[dd]))
-      })
+      
       this.anillos_base
         .attr("d", (anio) => {
             this.arc
               .innerRadius(this.escalaRadial(anio))
               .outerRadius(this.escalaRadial(anio) + this.escalaRadial.bandwidth())
               .startAngle(this.escalaAngular(0))
-              .endAngle(2 * Math.PI )
+              .endAngle(this.escalaAngular(100))
             return this.arc()
       })
       .style("fill","#bfbfbf")
+
       this.anillos
         .attr("d", (anio) => {
           let datum = this.datos.filter(d=>d["AÑO"] == anio);
@@ -267,9 +245,71 @@ export default {
           }
         })
         this.fecha
-          .attr("x", 0)
-          .attr("y",  d=> -this.escalaRadial(d) * Math.cos(this.escalaAngular(0)))
+          .attr("transform",(d) => `translate(
+            ${this.escalaRadial(d) * Math.sin(this.escalaAngular(0)) - this.escalaRadial.bandwidth() * .5}, 
+            ${-this.escalaRadial(d) * Math.cos(this.escalaAngular(0))})rotate(-90)`)
           .style("fill","gray")
+          .attr("dominant-baseline","middle")
+        
+
+        this.barras
+          .attr("transform", `translate(${0},${-.5 * this.alto})`)
+          .attr("x", (anio) => this.escalaRadial(anio) * Math.sin(this.escalaAngular(0)) - this.escalaRadial.bandwidth())
+          .attr("y", (anio) => {
+            let datum = this.datos.filter(d=>d["AÑO"] == anio);
+            if(datum.length == 1){
+              datum = datum[0]
+              return this.escalaAlturaBarras(datum.total_sanciones)
+            }
+            else{
+              return 0;  
+            }
+           
+            
+          })
+          .attr("width", this.escalaRadial.bandwidth())
+          .attr("height", (anio) => {
+            let datum = this.datos.filter(d=>d["AÑO"] == anio);
+            if(datum.length == 1){
+              datum = datum[0]
+              return this.escalaAlturaBarras(0) - this.escalaAlturaBarras(datum.total_sanciones);
+            }
+            else{
+              return 0;  
+            }
+          })
+        
+
+        this.cifras
+          .text(((anio) => {
+              let datum = this.datos.filter(d=>d["AÑO"] == anio);
+              if(datum.length == 1){
+                datum = datum[0]
+                return datum.total_sanciones
+              }
+              else{
+                return 0;  
+              }
+            })
+          )
+          .attr("transform", (anio) => {
+            let datum = this.datos.filter(d=>d["AÑO"] == anio);
+            if(datum.length == 1){
+              datum = datum[0]
+              return `translate(
+                ${this.escalaRadial(anio) * Math.sin(this.escalaAngular(0)) - this.escalaRadial.bandwidth() * .5}, 
+                ${ this.escalaAlturaBarras(datum.total_sanciones) - this.alto * .5})rotate(-90)`
+            }
+            else{
+              return `translate(
+                ${this.escalaRadial(anio) * Math.sin(this.escalaAngular(0)) - this.escalaRadial.bandwidth() * .5}, 
+                ${ this.escalaAlturaBarras(0)  - this.alto * .5})rotate(-90)`
+            }
+            
+
+          })
+          .style("fill","gray")
+          .attr("dominant-baseline","middle")
 
       
     
@@ -281,73 +321,7 @@ export default {
       this.actualizandoAnillos();
 
     },
-    mostrarTooltip(evento) {
-        /*
-        // TODO: volter esto layerX y this.escalaX.step();
-        this.tooltip_bandas = this.escalaX.step();
-        this.tooltip_indice = parseInt((evento.layerX - this.margen.izquierda ) / this.tooltip_bandas)
 
-        if (this.tooltip_indice < this.datos.length) {
-          this.tooltip_categoria = this.escalaX.domain()[this.tooltip_indice]
-          this.tooltip_data_seleccionada = this.datos.filter(dd => (dd.anio == this.tooltip_categoria))[0];
-          this.tooltip
-              .style("visibility", "visible")
-              //.style("left", evento.layerX > .5 * (this.ancho + this.margen.izquierda + this.margen.derecha) ? `${evento.layerX - this.ancho_tooltip + this.ancho_leyenda_y - 30}px` : `${evento.layerX + this.ancho_leyenda_y + 20}px`)
-              .style("left", (evento.layerX < .5 * this.ancho_tooltip ? 0 : 
-                evento.layerX >  this.ancho + this.margen.izquierda + this.margen.derecha - .5 * this.ancho_tooltip ? this.ancho + this.margen.izquierda - this.margen.derecha -  this.ancho_tooltip :
-                evento.layerX - .5 * this.ancho_tooltip) + "px"
-              )
-
-              .style("width", this.ancho_tooltip + "px")
-
-          let contenido_tooltip = this.tooltip.select(".tooltip-contenido")
-              .style("background", this.$store.state.background_tooltip)
-              .style("min-width", this.ancho_tooltip + "px")
-              .style("border-radius", "8px")
-              .style("width", this.ancho_tooltip + "px")
-              .attr("height", 70)
-              //.style("min-width", this.ancho_tooltip + "px")
-              //.style("width", this.ancho_tooltip + "px")
-              //.style("padding", "0 3px 0 10px")
-              //.style("height", "143px")
-              //.style("width", "314px")
-              .style("border-radius", "5px")
-              .style("padding", "10px")
-              .style("font-size", "16px")
-              .style("letter-spacing","0.32px")
-              .style("color", "#FFFFFF")
-
-          contenido_tooltip.select("div.tooltip-cifras")
-              .html(this.textoTooltip())
-          
-          let alto_tooltip = parseInt(this.tooltip.style("height"))
-          console.log((evento.layerY > .5 * alto_tooltip ? 0 : 
-                evento.layerY <  this.alto + this.margen.arriba + this.margen.abajo - .5 * alto_tooltip ? this.alto + this.margen.arriba - this.margen.abajo -  alto_tooltip :
-                evento.layerY - .5 * alto_tooltip))
-          this.tooltip
-            .style("top", (evento.layerY > this.alto + this.margen.arriba + this.margen.abajo - alto_tooltip ? evento.layerY - 20 - alto_tooltip : evento.layerY + 20 ) + "px"
-              )
-
-
-          this.anillos_individuales
-              .style("fill-opacity", ".5")
-
-          this.anillos_individuales
-              .filter(d => d.anio == this.tooltip_categoria)
-              .style("fill-opacity", "1")
-        }
-        */
-      
-      
-    },
-    cerrarTooltip() {
-      this.tooltip
-          .style("visibility", "hidden");
-      this.anillos_individuales
-          .style("fill-opacity", "1")
-          //.style("fill", "#D4DB9B")
-
-    },
 
   }
 }
@@ -377,7 +351,17 @@ svg.svg-anillos::v-deep text {
         position: relative;
         display: inline-block;
       }
-      
+      span.nomen-ha-cultivo{
+        width: 20px;
+        height: 14px;
+        border-radius: 4px;
+        transform: translate(0, 2px);
+      }
+      span.nomen-ha-perdida-arborea{
+        width: 20px;
+        height: 2px;
+        transform: translate(0, -5px);
+      }
     }
     
   }
@@ -428,70 +412,6 @@ div.contenedor-tooltip-svg {
     letter-spacing: 1.25px; 
     height:0;
     color: #4E4D33;
-  }
-
-
-  div.tooltip {
-    color: #FFFFFF;;
-    font-size: 12px;
-    position: absolute;
-    z-index: 2;
-    visibility: hidden;
-  }
-
-  div.tooltip div.tooltip-cifras {
-    padding-bottom: 5px;
-
-    p {
-      margin: 0px;
-      line-height: 1.4;
-      font-size:16px;
-      span{
-        position: relative;
-        display: inline-block;
-      }
-      span.nomen-ha-cultivo{
-        width: 20px;
-        height: 14px;
-        border-radius: 4px;
-        transform: translate(0, 2px);
-      }
-      span.nomen-ha-perdida-arborea{
-        width: 20px;
-        height: 2px;
-        transform: translate(0, -5px);
-      }
-    }
-
-  }
-
-  div.tooltip div.contenedor-boton-cerrar {
-    height: auto;
-    display: flex;
-    width: 100%;
-    padding-top: 5px;
-    font-weight: 600;
-  }
-
-  div.tooltip button.boton-cerrar-tooltip {
-    background: #fff;
-    border: none;
-    font-size: 30px;
-    line-height: .9;
-    font-weight: 300;
-    padding: 0 5px;
-    border-radius: 5px;
-    margin: 0 0 0 auto;
-    @media (min-width: 768px) {
-      display: none;
-    }
-    cursor: pointer;
-
-    img {
-      width: 30px;
-      height: 30px;
-      float: right;
-    }
   }
 }
 </style>

@@ -8,35 +8,22 @@
 </template>
 <script>
 import { mapState } from 'vuex';
-
-import Mapa from '@/components/Mapa.vue'
-import Serie from '@/components/Serie.vue'
 import VizAnillos from '@/components/VizAnillos.vue'
 import * as d3 from "d3";
 
 export default {
   name: 'Sancionadas',
   components: {
-    Mapa,
-    Serie,
     VizAnillos
   },
   data(){
     return {
       geojson: Object,
       datos:[],
-
     }
   },
   methods:{
-    alternarVistaMovil(){
-      if(this.visible_movil == "mapa"){
-        this.visible_movil = "grafica"
-      }
-      else{
-        this.visible_movil = "mapa"
-      }
-    }
+
   },
   beforeMount(){
     d3.csv("data/sanciones.csv").then((data) => {
