@@ -42,6 +42,12 @@
       </div>
       
     </slot>
+    <div class="fuente">
+      <p>
+        Fuentes: Servicio de Información Agroalimentaria y Pesquera (SIAP) y
+        Global Forest Watch-WRI-México.
+      </p>
+    </div>
   </div>
 </template>
 
@@ -485,35 +491,54 @@ svg.svg-barras::v-deep text {
 }
 
 .pie{
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  @media (max-width: 768px) {
+    justify-content: flex-start;
+  }
+
   button{
     border: none;
     background: none;
     border-radius: 0 ;
     p{margin: 0px;
-      line-height: 1.4;
+      display: flex;
+      line-height: 2.1;
       font-size:16px;
-        padding-left: 10px;
+      padding-left: 10px;
 
       span{
         position: relative;
-        display: inline-block;
-      }
-      span.nomen-ha-cultivo{
-        width: 20px;
-        height: 20px;
-      }
-      span.nomen-ha-perdida-arborea{
-        width: 20px;
-        height: 20px;
+        margin-right: 10px;
+        display: inline-flex;
+        border: solid 1px #000;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        &::before{
+          content:"";
+          position: absolute;
+          top: 0px;
+          left: 0px;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: #fff;
+
+        }
+        
       }
     }
     &.activo{
-      span.nomen-ha-cultivo{
-
-      }
-      span.nomen-ha-perdida-arborea{
-
-      }
+      p span::before{
+        top: 10px;
+          left: 10px;
+          width: 10px;
+          height: 10px;
+          
+          
+        }
 
     }
   }
