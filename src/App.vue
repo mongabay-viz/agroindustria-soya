@@ -159,7 +159,7 @@ body {
       }
     }
     .fuente{
-      .mapa{
+      &.mapa{
         @media (min-width: 768px) {
           display: none;
         }
