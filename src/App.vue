@@ -135,6 +135,12 @@ body {
         width: calc(100% - 42px);
         height: 100%;
         position: absolute;
+        z-index: -1;
+        opacity: 0;
+        &.visible-en-movil {
+          z-index: 1;
+          opacity: 1;
+        }
       }
     }
     .contenedor-mapa {
@@ -145,8 +151,17 @@ body {
         position: absolute;
         height: 442px;
         z-index: -1;
+        opacity: 0;
         &.visible-en-movil {
           z-index: 1;
+          opacity: 1;
+        }
+      }
+    }
+    .fuente{
+      .mapa{
+        @media (min-width: 768px) {
+          display: none;
         }
       }
     }

@@ -4,6 +4,12 @@
         <div class="mapa" :id="id">
             
         </div>
+        <div class="fuente mapa">
+            <p>
+                Fuentes: Servicio de Información Agroalimentaria y Pesquera (SIAP) y
+                Global Forest Watch-WRI-México.
+            </p>
+        </div>
     </div>
 </template>
 <script>

@@ -32,6 +32,7 @@
         :variables="[
           { id: 'cultivo', nombre_colores: 'cultivo', color: 'green'},
         ]"
+        :class="{'visible-en-movil':(visible_movil == 'grafica' ) }"
         :margen="{'arriba': 40, 'abajo': 20, 'izquierda': 60, 'derecha': 20}"
         :nombre_barra="'anio'"
         :nombre_color="'nombre_colores'"
@@ -41,7 +42,7 @@
         ref="mi_serie_temporal"
       />
     </div>
-    </div>
+  </div>
 </template>
 <script>
 import { mapState } from 'vuex';
