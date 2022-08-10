@@ -3,16 +3,7 @@
     <h2>{{catego_seleccionada}}, {{municipio_seleccionado}}</h2>
     <slot name="encabezado"></slot>
     <div class="contenedor-tooltip-svg">
-      <div class="tooltip">
-        <div class="tooltip-contenido">
-          <div class="contenedor-boton-cerrar">
-            <button class="boton-cerrar-tooltip" @click="cerrarTooltip">
-              &times;
-            </button>
-          </div>
-          <div class="tooltip-cifras"></div>
-        </div>
-      </div>
+
       <div class="rotation-wrapper-outer">
         <div class="rotation-wrapper-inner">
           <div :style="{width: `${alto_vis - margen.arriba - margen.abajo}px`,
@@ -39,6 +30,7 @@
 </template>
 
 <script>
+import { text } from "body-parser";
 import * as d3 from "d3";
 import { stringify } from "querystring";
 
@@ -59,10 +51,7 @@ export default {
     },
     titulo_eje_y: String,
     titulo_eje_x: String,
-    ancho_tooltip: {
-      type: Number,
-      default: 334
-    },
+
     margen: {
       type: Object,
       default: function () {
@@ -76,38 +65,15 @@ export default {
         return .3
       }
     },
-    tooltip_activo: {
-      type: Boolean,
-      default: function () {
-        return true
-      }
-    },
+    
 
-    textoTooltip: {
-      type: Function,
-      default: function () {
-        
-        let texto = `
-        <div>
-          <p>Año: <b>${this.tooltip_categoria}</b></p>
-          <p>Cultivo: <b>${this.$store.state['nombre_cultivo_'+ this.cultivo].toLowerCase()}</b></p>
-          <p>Estado: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.estado : ""}</b></p>
-          <p>Municipio: <b>${this.tooltip_data_seleccionada ? this.tooltip_data_seleccionada.municipio : ""}</b></p>
-          <p><span class="nomen-ha-cultivo" style="background: ${this.$store.state['color_cultivo_'+ this.cultivo]}"></span> Hectáreas de cultivo: <b>${this.tooltip_data_seleccionada.cultivo.toLocaleString("en")}</b></p>
-          <p><span class="nomen-ha-perdida-arborea" style="background: ${this.$store.state.color_linea_serie}"></span> Hectáreas de pérdida arbórea: <b>${this.tooltip_data_seleccionada.deforestacion.toLocaleString("en")}</b></p>
-        </div>
-        `
-
-        return texto
-      }
-    },
   },
   watch: {
     
     datos(nv, ov) {
       // todo esto se dispara cuando cambian los datos, i.e. seleccionamos un municipio distinto
       this.configurandoDimensionesParaAnillos();
-      
+      this.creandoAnillos()
       this.actualizandoAnillos();
     }
   },
@@ -120,7 +86,13 @@ export default {
       lista_anios: d3.range(2015,2023),
       categorias_sanciones: ["sin información","no sancionado","sancionado","redirigido"],
       catego_seleccionada:"sancionado",
-      municipio_seleccionado: ""
+      municipio_seleccionado: "",
+      categorias:["Sin registro","No sancionatoria","Sancionatoria"],
+      dict_color: {
+        "Sin registro":"red",
+        "No sancionatoria":"green",
+        "Sancionatoria":"blue"
+      }
     }
   },
   mounted() {
@@ -150,8 +122,9 @@ export default {
 
     this.tooltip = d3.select(`#${this.anillos_id} .tooltip`);
     this.configurandoDimensionesParaSVG();
-    this.configurandoDimensionesParaAnillos();
     this.creandoAnillos();
+    this.configurandoDimensionesParaAnillos();
+
     this.actualizandoAnillos();
 
     window.addEventListener("resize", this.reescalandoPantalla)
@@ -175,104 +148,110 @@ export default {
           .attr("width", this.ancho + this.margen.derecha + this.margen.izquierda)
           .attr("height", this.alto + this.margen.arriba + this.margen.abajo)
           .style("left", this.ancho_leyenda_y + "px");
-      
-      
-      this.svg.append("text")
-        .attr("x", this.margen.izquierda - 8)
-        .attr("y",this.margen.arriba - 12)
-        .style("text-anchor","end")
-        .style("font-size","14")
-        .style("font-size","12px")
-        .style("fill", "#4E4D33")
-        .style("letter-spacing", "1.07px")
-        .style("text-align", "right")
-        
+
       this.grupo_contenedor
           .attr("transform", `translate(${this.margen.izquierda + .5 * this.ancho},${this.margen.arriba + .5 * this.ancho})`)
 
-      this.grupo_fondo
-          .attr("transform", `translate(${this.margen.izquierda},${this.margen.arriba})`)
-
-      this.grupo_frente
-          .attr("transform", `translate(${this.margen.izquierda},${this.margen.arriba})`)
 
     },
 
     configurandoDimensionesParaAnillos() {
-      this.escalaAngular = d3.scaleLinear()
-        .domain([0,100])
-        .range([0, 2 * Math.PI]);
-      
-      this.escalaRadial = this.escalaX = d3.scaleBand()
+
+      this.data_apilada = d3.stack()
+          .keys(this.categorias)(this.datos);
+      for (let i = 0; i < this.categorias.length; i++) {
+        this.data_apilada[i].forEach(d => {
+          d.data = Object.assign({}, d.data, {"key": this.data_apilada[i].key})
+        })
+      }
+      this.escalaRadial = d3.scaleBand()
         .domain(this.lista_anios)
         .range([this.ancho * .1, this.ancho * .48])
         .padding(.2)
-      
 
+      this.escalaAngular = d3.scaleLinear()
+        .domain([0,d3.max(this.datos.map(d => d3.sum(this.categorias.map(dd => d[dd]))))])
+        .range([0, 22/12 * Math.PI]);
     },
     creandoAnillos() {
-      this.grupo_anillos = this.grupo_contenedor
-        .selectAll("anillos")
-        .data(this.lista_anios)
-        .enter()
-        .append("g")
+      this.grupo_contenedor.selectAll(".anios").remove();
 
+      if(this.datos.length > 0){
+        console.log(this.datos,this.data_apilada)
+        this.grupo_anios = this.grupo_contenedor
+          .selectAll(".anios")
+          .data(this.data_apilada)
+          .enter()
+          .append("g")
+          .attr("class","anios")
+          .attr("fill",(d) => this.dict_color[d.key])
 
-      this.anillos_base = this.grupo_anillos
-        .append("path")
-      this.anillos = this.grupo_anillos
-        .append("path")
-      this.fecha = this.grupo_anillos
-        .append("text")
-        .text(d=>d)
-        .style("fill","gray")
-      
-
+        this.anillos = this.grupo_anios
+          .selectAll("rebanadas")
+          .data((d)=>{ return d})
+          .enter()
+          .append("path")
+          .style("fill-opacity",".5")
+        this.cantidades = this.grupo_anios
+          .selectAll("cantidades")
+          .data((d)=>{ return d})
+          .enter()
+          .append("text")
+        this.fechas = this.grupo_contenedor
+          .selectAll("anios")
+          .data(this.lista_anios)
+          .enter()
+          .append("text")
+      }
     },
   
     actualizandoAnillos() {
-      this.municipio_seleccionado = this.datos[0].edo_municipio_
+      if(this.datos.length > 0){
+        this.municipio_seleccionado = this.datos[0].edo_municipio_
 
-      this.datos.forEach((d) => {
-        d.total_sanciones = d3.sum(this.categorias_sanciones.map((dd) => +d[dd]))
-      })
-      this.anillos_base
-        .attr("d", (anio) => {
-            this.arc
-              .innerRadius(this.escalaRadial(anio))
-              .outerRadius(this.escalaRadial(anio) + this.escalaRadial.bandwidth())
-              .startAngle(this.escalaAngular(0))
-              .endAngle(2 * Math.PI )
-            return this.arc()
-      })
-      .style("fill","#bfbfbf")
-      this.anillos
-        .attr("d", (anio) => {
-          let datum = this.datos.filter(d=>d["AÑO"] == anio);
-          if(datum.length == 1){
-            datum = datum[0]
-            this.arc
-              .innerRadius(this.escalaRadial(anio))
-              .outerRadius(this.escalaRadial(anio) + this.escalaRadial.bandwidth())
-              .startAngle(this.escalaAngular(0))
-              .endAngle(this.escalaAngular(100 * datum[this.catego_seleccionada] / datum.total_sanciones))
-            return this.arc()
-          }
-          else{
-             this.arc
-              .innerRadius(this.escalaRadial(anio))
-              .outerRadius(this.escalaRadial(anio) + this.escalaRadial.bandwidth())
-              .startAngle(this.escalaAngular(0))
-              .endAngle(this.escalaAngular(0))
-          }
-        })
-        this.fecha
-          .attr("x", 0)
-          .attr("y",  d=> -this.escalaRadial(d) * Math.cos(this.escalaAngular(0)))
-          .style("fill","gray")
 
-      
-    
+        this.anillos
+          .attr("d", (d) => {
+              return this.arc
+                .innerRadius(this.escalaRadial(+d.data["AÑO"]))
+                .outerRadius(this.escalaRadial(+d.data["AÑO"]) + this.escalaRadial.bandwidth())
+                .startAngle(this.escalaAngular(d[0]))
+                .endAngle(this.escalaAngular(d[1]))(d)
+            }
+            
+          )
+        this.cantidades
+          .text(d=> d.data[d.data.key]!= "0.0"? parseInt(d.data[d.data.key]): "")
+          .attr("x", (d)=>{ return this.escalaRadial(+d.data["AÑO"]) * Math.cos(this.escalaAngular(d[1]) - Math.PI * .5)
+          })
+          .attr("y", (d)=>{
+            return this.escalaRadial(+d.data["AÑO"]) * Math.sin(this.escalaAngular(d[1])- Math.PI * .5)
+
+          })
+          .style("fill-opacity",".6")
+        
+        this.fechas
+          .text(d=>d)
+          .attr("x", (d)=>{ return this.escalaRadial(+d) * Math.cos(- Math.PI * .5)
+          })
+          .attr("y", (d)=>{
+            return this.escalaRadial(+d) * Math.sin(- Math.PI * .5) - this.escalaRadial.bandwidth() * .5
+
+          })
+          .attr("text-anchor","end")
+          .attr("dominant-baseline","middle")
+
+
+
+
+          /*this.fecha
+            .attr("transform",(d) => `translate(
+              ${this.escalaRadial(d) * Math.sin(this.escalaAngular(0)) - this.escalaRadial.bandwidth() * .5}, 
+              ${-this.escalaRadial(d) * Math.cos(this.escalaAngular(0))})rotate(-90)`)
+            .style("fill","gray")
+            .attr("dominant-baseline","middle")*/
+      }
+        
     },
 
     reescalandoPantalla() {
@@ -281,73 +260,7 @@ export default {
       this.actualizandoAnillos();
 
     },
-    mostrarTooltip(evento) {
-        /*
-        // TODO: volter esto layerX y this.escalaX.step();
-        this.tooltip_bandas = this.escalaX.step();
-        this.tooltip_indice = parseInt((evento.layerX - this.margen.izquierda ) / this.tooltip_bandas)
 
-        if (this.tooltip_indice < this.datos.length) {
-          this.tooltip_categoria = this.escalaX.domain()[this.tooltip_indice]
-          this.tooltip_data_seleccionada = this.datos.filter(dd => (dd.anio == this.tooltip_categoria))[0];
-          this.tooltip
-              .style("visibility", "visible")
-              //.style("left", evento.layerX > .5 * (this.ancho + this.margen.izquierda + this.margen.derecha) ? `${evento.layerX - this.ancho_tooltip + this.ancho_leyenda_y - 30}px` : `${evento.layerX + this.ancho_leyenda_y + 20}px`)
-              .style("left", (evento.layerX < .5 * this.ancho_tooltip ? 0 : 
-                evento.layerX >  this.ancho + this.margen.izquierda + this.margen.derecha - .5 * this.ancho_tooltip ? this.ancho + this.margen.izquierda - this.margen.derecha -  this.ancho_tooltip :
-                evento.layerX - .5 * this.ancho_tooltip) + "px"
-              )
-
-              .style("width", this.ancho_tooltip + "px")
-
-          let contenido_tooltip = this.tooltip.select(".tooltip-contenido")
-              .style("background", this.$store.state.background_tooltip)
-              .style("min-width", this.ancho_tooltip + "px")
-              .style("border-radius", "8px")
-              .style("width", this.ancho_tooltip + "px")
-              .attr("height", 70)
-              //.style("min-width", this.ancho_tooltip + "px")
-              //.style("width", this.ancho_tooltip + "px")
-              //.style("padding", "0 3px 0 10px")
-              //.style("height", "143px")
-              //.style("width", "314px")
-              .style("border-radius", "5px")
-              .style("padding", "10px")
-              .style("font-size", "16px")
-              .style("letter-spacing","0.32px")
-              .style("color", "#FFFFFF")
-
-          contenido_tooltip.select("div.tooltip-cifras")
-              .html(this.textoTooltip())
-          
-          let alto_tooltip = parseInt(this.tooltip.style("height"))
-          console.log((evento.layerY > .5 * alto_tooltip ? 0 : 
-                evento.layerY <  this.alto + this.margen.arriba + this.margen.abajo - .5 * alto_tooltip ? this.alto + this.margen.arriba - this.margen.abajo -  alto_tooltip :
-                evento.layerY - .5 * alto_tooltip))
-          this.tooltip
-            .style("top", (evento.layerY > this.alto + this.margen.arriba + this.margen.abajo - alto_tooltip ? evento.layerY - 20 - alto_tooltip : evento.layerY + 20 ) + "px"
-              )
-
-
-          this.anillos_individuales
-              .style("fill-opacity", ".5")
-
-          this.anillos_individuales
-              .filter(d => d.anio == this.tooltip_categoria)
-              .style("fill-opacity", "1")
-        }
-        */
-      
-      
-    },
-    cerrarTooltip() {
-      this.tooltip
-          .style("visibility", "hidden");
-      this.anillos_individuales
-          .style("fill-opacity", "1")
-          //.style("fill", "#D4DB9B")
-
-    },
 
   }
 }
@@ -368,17 +281,7 @@ svg.svg-anillos::v-deep text {
 }
 
 .pie{
-     p{margin: 0px;
-      line-height: 1.4;
-      font-size:16px;
-        padding-left: 10px;
 
-      span{
-        position: relative;
-        display: inline-block;
-      }
-      
-    }
     
   }
 div.contenedor-tooltip-svg {
@@ -428,70 +331,6 @@ div.contenedor-tooltip-svg {
     letter-spacing: 1.25px; 
     height:0;
     color: #4E4D33;
-  }
-
-
-  div.tooltip {
-    color: #FFFFFF;;
-    font-size: 12px;
-    position: absolute;
-    z-index: 2;
-    visibility: hidden;
-  }
-
-  div.tooltip div.tooltip-cifras {
-    padding-bottom: 5px;
-
-    p {
-      margin: 0px;
-      line-height: 1.4;
-      font-size:16px;
-      span{
-        position: relative;
-        display: inline-block;
-      }
-      span.nomen-ha-cultivo{
-        width: 20px;
-        height: 14px;
-        border-radius: 4px;
-        transform: translate(0, 2px);
-      }
-      span.nomen-ha-perdida-arborea{
-        width: 20px;
-        height: 2px;
-        transform: translate(0, -5px);
-      }
-    }
-
-  }
-
-  div.tooltip div.contenedor-boton-cerrar {
-    height: auto;
-    display: flex;
-    width: 100%;
-    padding-top: 5px;
-    font-weight: 600;
-  }
-
-  div.tooltip button.boton-cerrar-tooltip {
-    background: #fff;
-    border: none;
-    font-size: 30px;
-    line-height: .9;
-    font-weight: 300;
-    padding: 0 5px;
-    border-radius: 5px;
-    margin: 0 0 0 auto;
-    @media (min-width: 768px) {
-      display: none;
-    }
-    cursor: pointer;
-
-    img {
-      width: 30px;
-      height: 30px;
-      float: right;
-    }
   }
 }
 </style>
