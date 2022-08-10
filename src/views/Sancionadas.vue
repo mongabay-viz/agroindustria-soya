@@ -28,7 +28,7 @@ export default {
   beforeMount(){
     d3.csv("data/sanciones.csv").then((data) => {
       this.datos_completos = data
-      this.datos = this.datos_completos.filter(d=> d.cvegeo =="23010")
+      this.datos = this.datos_completos.filter(d=> d.cvegeo =="19034")
     }) 
     
   },

@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { text } from "body-parser";
 import * as d3 from "d3";
 import { stringify } from "querystring";
 
@@ -64,6 +65,7 @@ export default {
         return .3
       }
     },
+    
 
   },
   watch: {
@@ -71,7 +73,7 @@ export default {
     datos(nv, ov) {
       // todo esto se dispara cuando cambian los datos, i.e. seleccionamos un municipio distinto
       this.configurandoDimensionesParaAnillos();
-      
+      this.creandoAnillos()
       this.actualizandoAnillos();
     }
   },
@@ -84,7 +86,13 @@ export default {
       lista_anios: d3.range(2015,2023),
       categorias_sanciones: ["sin información","no sancionado","sancionado","redirigido"],
       catego_seleccionada:"sancionado",
-      municipio_seleccionado: ""
+      municipio_seleccionado: "",
+      categorias:["Sin registro","No sancionatoria","Sancionatoria"],
+      dict_color: {
+        "Sin registro":"red",
+        "No sancionatoria":"green",
+        "Sancionatoria":"blue"
+      }
     }
   },
   mounted() {
@@ -140,179 +148,110 @@ export default {
           .attr("width", this.ancho + this.margen.derecha + this.margen.izquierda)
           .attr("height", this.alto + this.margen.arriba + this.margen.abajo)
           .style("left", this.ancho_leyenda_y + "px");
-      
-      
-      this.svg.append("text")
-        .attr("x", this.margen.izquierda - 8)
-        .attr("y",this.margen.arriba - 12)
-        .style("text-anchor","end")
-        .style("font-size","14")
-        .style("font-size","12px")
-        .style("fill", "#4E4D33")
-        .style("letter-spacing", "1.07px")
-        .style("text-align", "right")
-        
+
       this.grupo_contenedor
           .attr("transform", `translate(${this.margen.izquierda + .5 * this.ancho},${this.margen.arriba + .5 * this.ancho})`)
 
-      this.grupo_fondo
-          .attr("transform", `translate(${this.margen.izquierda},${this.margen.arriba})`)
-
-      this.grupo_frente
-          .attr("transform", `translate(${this.margen.izquierda},${this.margen.arriba})`)
 
     },
 
     configurandoDimensionesParaAnillos() {
-      this.datos.forEach((d) => {
-        d.total_sanciones = d3.sum(this.categorias_sanciones.map((dd) => +d[dd]))
-      })
-      this.escalaAngular = d3.scaleLinear()
-        .domain([0,100])
-        .range([ 1.5 * Math.PI, 0]);
-      
+
+      this.data_apilada = d3.stack()
+          .keys(this.categorias)(this.datos);
+      for (let i = 0; i < this.categorias.length; i++) {
+        this.data_apilada[i].forEach(d => {
+          d.data = Object.assign({}, d.data, {"key": this.data_apilada[i].key})
+        })
+      }
       this.escalaRadial = d3.scaleBand()
         .domain(this.lista_anios)
         .range([this.ancho * .1, this.ancho * .48])
         .padding(.2)
-      var y_max = d3.max(this.datos.map(d => d.total_sanciones))
-      y_max = y_max ? y_max : 0;
-      
-      this.escalaAlturaBarras = d3.scaleLinear()
-          .domain([0, y_max])
-          .range([this.ancho * .5 - 50, 0]);
-      
 
+      this.escalaAngular = d3.scaleLinear()
+        .domain([0,d3.max(this.datos.map(d => d3.sum(this.categorias.map(dd => d[dd]))))])
+        .range([0, 22/12 * Math.PI]);
     },
     creandoAnillos() {
-      this.grupo_anios = this.grupo_contenedor
-        .selectAll("anios")
-        .data(this.lista_anios)
-        .enter()
-        .append("g")
-      this.anillos_base = this.grupo_anios
-        .append("path")
-      this.anillos = this.grupo_anios
-        .append("path")
-      this.barras = this.grupo_anios
-        .append("rect")
+      this.grupo_contenedor.selectAll(".anios").remove();
 
-      this.fecha = this.grupo_anios
-        .append("text")
-        .text(d=>d)
-        .style("fill","gray")
+      if(this.datos.length > 0){
+        console.log(this.datos,this.data_apilada)
+        this.grupo_anios = this.grupo_contenedor
+          .selectAll(".anios")
+          .data(this.data_apilada)
+          .enter()
+          .append("g")
+          .attr("class","anios")
+          .attr("fill",(d) => this.dict_color[d.key])
 
-      this.cifras = this.grupo_anios
-        .append("text")
-        
-      
-
+        this.anillos = this.grupo_anios
+          .selectAll("rebanadas")
+          .data((d)=>{ return d})
+          .enter()
+          .append("path")
+          .style("fill-opacity",".5")
+        this.cantidades = this.grupo_anios
+          .selectAll("cantidades")
+          .data((d)=>{ return d})
+          .enter()
+          .append("text")
+        this.fechas = this.grupo_contenedor
+          .selectAll("anios")
+          .data(this.lista_anios)
+          .enter()
+          .append("text")
+      }
     },
   
     actualizandoAnillos() {
-      this.municipio_seleccionado = this.datos[0].edo_municipio_
+      if(this.datos.length > 0){
+        this.municipio_seleccionado = this.datos[0].edo_municipio_
 
-      
-      this.anillos_base
-        .attr("d", (anio) => {
-            this.arc
-              .innerRadius(this.escalaRadial(anio))
-              .outerRadius(this.escalaRadial(anio) + this.escalaRadial.bandwidth())
-              .startAngle(this.escalaAngular(0))
-              .endAngle(this.escalaAngular(100))
-            return this.arc()
-      })
-      .style("fill","#bfbfbf")
 
-      this.anillos
-        .attr("d", (anio) => {
-          let datum = this.datos.filter(d=>d["AÑO"] == anio);
-          if(datum.length == 1){
-            datum = datum[0]
-            this.arc
-              .innerRadius(this.escalaRadial(anio))
-              .outerRadius(this.escalaRadial(anio) + this.escalaRadial.bandwidth())
-              .startAngle(this.escalaAngular(0))
-              .endAngle(this.escalaAngular(100 * datum[this.catego_seleccionada] / datum.total_sanciones))
-            return this.arc()
-          }
-          else{
-             this.arc
-              .innerRadius(this.escalaRadial(anio))
-              .outerRadius(this.escalaRadial(anio) + this.escalaRadial.bandwidth())
-              .startAngle(this.escalaAngular(0))
-              .endAngle(this.escalaAngular(0))
-          }
-        })
-        this.fecha
-          .attr("transform",(d) => `translate(
-            ${this.escalaRadial(d) * Math.sin(this.escalaAngular(0)) - this.escalaRadial.bandwidth() * .5}, 
-            ${-this.escalaRadial(d) * Math.cos(this.escalaAngular(0))})rotate(-90)`)
-          .style("fill","gray")
-          .attr("dominant-baseline","middle")
-        
-
-        this.barras
-          .attr("transform", `translate(${0},${-.5 * this.alto})`)
-          .attr("x", (anio) => this.escalaRadial(anio) * Math.sin(this.escalaAngular(0)) - this.escalaRadial.bandwidth())
-          .attr("y", (anio) => {
-            let datum = this.datos.filter(d=>d["AÑO"] == anio);
-            if(datum.length == 1){
-              datum = datum[0]
-              return this.escalaAlturaBarras(datum.total_sanciones)
+        this.anillos
+          .attr("d", (d) => {
+              return this.arc
+                .innerRadius(this.escalaRadial(+d.data["AÑO"]))
+                .outerRadius(this.escalaRadial(+d.data["AÑO"]) + this.escalaRadial.bandwidth())
+                .startAngle(this.escalaAngular(d[0]))
+                .endAngle(this.escalaAngular(d[1]))(d)
             }
-            else{
-              return 0;  
-            }
-           
             
-          })
-          .attr("width", this.escalaRadial.bandwidth())
-          .attr("height", (anio) => {
-            let datum = this.datos.filter(d=>d["AÑO"] == anio);
-            if(datum.length == 1){
-              datum = datum[0]
-              return this.escalaAlturaBarras(0) - this.escalaAlturaBarras(datum.total_sanciones);
-            }
-            else{
-              return 0;  
-            }
-          })
-        
-
-        this.cifras
-          .text(((anio) => {
-              let datum = this.datos.filter(d=>d["AÑO"] == anio);
-              if(datum.length == 1){
-                datum = datum[0]
-                return datum.total_sanciones
-              }
-              else{
-                return 0;  
-              }
-            })
           )
-          .attr("transform", (anio) => {
-            let datum = this.datos.filter(d=>d["AÑO"] == anio);
-            if(datum.length == 1){
-              datum = datum[0]
-              return `translate(
-                ${this.escalaRadial(anio) * Math.sin(this.escalaAngular(0)) - this.escalaRadial.bandwidth() * .5}, 
-                ${ this.escalaAlturaBarras(datum.total_sanciones) - this.alto * .5})rotate(-90)`
-            }
-            else{
-              return `translate(
-                ${this.escalaRadial(anio) * Math.sin(this.escalaAngular(0)) - this.escalaRadial.bandwidth() * .5}, 
-                ${ this.escalaAlturaBarras(0)  - this.alto * .5})rotate(-90)`
-            }
-            
+        this.cantidades
+          .text(d=> d.data[d.data.key]!= "0.0"? parseInt(d.data[d.data.key]): "")
+          .attr("x", (d)=>{ return this.escalaRadial(+d.data["AÑO"]) * Math.cos(this.escalaAngular(d[1]) - Math.PI * .5)
+          })
+          .attr("y", (d)=>{
+            return this.escalaRadial(+d.data["AÑO"]) * Math.sin(this.escalaAngular(d[1])- Math.PI * .5)
 
           })
-          .style("fill","gray")
+          .style("fill-opacity",".6")
+        
+        this.fechas
+          .text(d=>d)
+          .attr("x", (d)=>{ return this.escalaRadial(+d) * Math.cos(- Math.PI * .5)
+          })
+          .attr("y", (d)=>{
+            return this.escalaRadial(+d) * Math.sin(- Math.PI * .5) - this.escalaRadial.bandwidth() * .5
+
+          })
+          .attr("text-anchor","end")
           .attr("dominant-baseline","middle")
 
-      
-    
+
+
+
+          /*this.fecha
+            .attr("transform",(d) => `translate(
+              ${this.escalaRadial(d) * Math.sin(this.escalaAngular(0)) - this.escalaRadial.bandwidth() * .5}, 
+              ${-this.escalaRadial(d) * Math.cos(this.escalaAngular(0))})rotate(-90)`)
+            .style("fill","gray")
+            .attr("dominant-baseline","middle")*/
+      }
+        
     },
 
     reescalandoPantalla() {
