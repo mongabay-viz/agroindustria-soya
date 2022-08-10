@@ -55,18 +55,24 @@ body {
   .titulo {
     margin: 0;
     width: 64%;
-    line-height: 120%;
-    font-size: 21px;
-    text-align: justify;
-    letter-spacing: 0px;
+    line-height: 21px;
+    font-size: 16px;
+    text-align: left;
+    //letter-spacing: 0px;
     color: #222100;
     @media (max-width: 768px) {
-      font-size: 18px;
+      font-size: 12px;
       width: 100%;
+      line-height: 16px;
     }
 
     span {
+      font-size: 21px;
       font-weight: bolder;
+      margin-bottom: 8px;
+      @media (max-width: 768px) {
+        font-size: 20px;
+      }
     }
   }
 
@@ -158,8 +164,8 @@ body {
         }
       }
     }
-    .fuente{
-      &.mapa{
+    .fuente {
+      &.mapa {
         @media (min-width: 768px) {
           display: none;
         }
