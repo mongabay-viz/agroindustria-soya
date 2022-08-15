@@ -1,28 +1,11 @@
 <template>
   <div>
     <p class="titulo">
-      Municipios de
-      <span
-        v-for="(estado, index) in $store.state['listado_estados_' + cultivo]"
-        :key="estado.id"
-      >
-        <span
-          v-if="
-            index != 0 &&
-            index != $store.state['listado_estados_' + cultivo].length - 1
-          "
-          >,</span
-        >
-        <span
-          v-if="index == $store.state['listado_estados_' + cultivo].length - 1"
-        >
-          y</span
-        >
-        {{ estado }}</span
-      >
-      donde se detecta deforestación y pérdida arbórea por cultivo de
-      <span>{{ $store.state["nombre_cultivo" + cultivo] }}</span> en los últimos
-      10 años
+      <span>Aquí la soya gana terreno</span> <br />
+
+      En estos municipios del sureste de México, las hectáreas sembradas con
+      soya han ido en aumento. En la visualización también es posible conocer
+      cómo ha sido la pérdida de cobertura arbórea en esos territorios.
     </p>
     <p class="municipio">Municipio</p>
     <div class="controles">
