@@ -1,35 +1,56 @@
 <template>
     <div class="vista-sancionadas">
+      <h2>PÉRDIDA FORESTAL QUE NO SE SANCIONA</h2>
+      <p>Estados en donde la Profepa inició procedimientos por cambio de uso de suelo forestal entre 2015 y febrero de 2022.</p>
+      <p>Estado</p>
       <select name="estatal" id="selector-estatal" v-model="estado_seleccionado">
         <option :value="estado" v-for="(estado,i) in lista_estatal" :key="i">
         {{estado}}
         </option>
       </select>
-      <BarrasApiladas
+      <BarrasAgrupadas
         :barras_id="'barras_agrupadas'"
         :datos="datos"
         :variables="[
-          { id: 'Total', nombre_colores: 'Total', color: 'green'},
-          { id: 'No sancionatoria', nombre_colores: 'No sancionatoria', color: 'red'},
+          { id: 'Procesos iniciados', nombre_colores: 'Procesos iniciados', color: '#302D03'},
+          { id: 'Sanciones', nombre_colores: 'Sanciones', color: '#AD8B20'},
         ]"
         :nombre_barra="'AÑO'"
         :nombre_color="'nombre_colores'"
-        titulo_eje_y="Eje vertical (numérico)"
-        titulo_eje_x="Eje horizontal (categórico)"
         :alto_vis="400"
+        :margen="{arriba: 20, abajo: 50, izquierda: 30, derecha: 20}"
         >
 
-      </BarrasApiladas>
+      </BarrasAgrupadas>
+      <div class="pie">
+        
+        <p>
+          <span
+            class="procesos-iniciados"
+            :style="{ background: '#302D03' }"
+          ></span>
+          Procesos iniciados
+        </p>
+
+        <p>
+          <span
+            class="sanciones-otorgadas"
+            :style="{ background: '#AD8B20' }"
+          ></span>
+          Sanciones otorgadas
+        </p>
+      </div>
+      <p>Fuente: Datos que Profepa entregó en respuesta a solicitudes de información.</p>
         
     </div>
 </template>
 <script>
 import * as d3 from "d3";
-import BarrasApiladas from "@/components/BarrasApiladas.vue"
+import BarrasAgrupadas from "@/components/BarrasAgrupadas.vue"
 export default {
   name: 'Sancionadas',
   components: {
-    BarrasApiladas
+    BarrasAgrupadas
   },
   data(){
     return {
@@ -45,8 +66,8 @@ export default {
   beforeMount(){
     d3.csv("data/sanciones.csv").then((data) => {
       data.forEach(d=>{
-        d["No sancionatoria"] = +d["No sancionatoria"];
-        d["Total"] = +d["Total"];
+        d["Sanciones"] = +d["Sanciones"];
+        d["Procesos iniciados"] = +d["Procesos iniciados"];
         
       })
       this.datos_completos = data
@@ -68,6 +89,26 @@ export default {
 </script>
 <style lang="scss">
 .vista-sancionadas{
-  width: 500px
+  max-width: 1366px;
+  margin:auto;
+  .contenedor-tooltip-svg{
+    min-width: 1000px;
+  }
+  .pie{
+    p{
+      display: flex;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.07px;
+
+      span{
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        margin-right: 10px;
+        transform: translate(0, 2px);
+      }
+    }
+  }
 }
 </style>

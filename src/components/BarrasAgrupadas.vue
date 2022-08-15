@@ -32,7 +32,9 @@
                 }" v-html="titulo_eje_x"></p>
       </div>
     </div>
-    <slot name="pie"></slot>
+    <slot name="pie">
+      
+    </slot>
 
   </div>
 </template>
@@ -58,7 +60,7 @@ export default {
     titulo_eje_x: String,
     ancho_tooltip: {
       type: Number,
-      default: 195
+      default: 235
     },
     margen: {
       type: Object,
@@ -75,7 +77,7 @@ export default {
     espaciado_barras: {
       type: Number,
       default: function () {
-        return .3
+        return .1
       }
     },
     logo_conacyt: {
@@ -96,12 +98,12 @@ export default {
         var txt = []
         this.variables.map((d) => {
           txt.push(`<p><span class="nomenclatura-tooltip" style="background: ${d.color}"></span>
-						${d[this.nombre_color]} | <b>${this.tooltip_data_seleccionada[d.id].toLocaleString("en")}</b> 
+						${d[this.nombre_color]}: <b>${this.tooltip_data_seleccionada[d.id].toLocaleString("en")}</b> 
 						</p>`)
         })
 
-        return `<p>${this.tooltip_categoria}</p>
-						${txt.reverse().join(" ")}`
+        return `<p>Año: ${this.tooltip_categoria}</p>
+						${txt.join(" ")}`
       }
     },
   },
@@ -155,7 +157,7 @@ export default {
       this.ancho_leyenda_y = document.querySelector(`#${this.barras_id} .rotation-wrapper-outer .element-to-rotate`)
           .clientHeight;
 
-      this.ancho = document.querySelector(`#${this.barras_id}`).clientWidth - this.margen.derecha - this.margen.izquierda - this.ancho_leyenda_y
+      this.ancho = document.querySelector(`#${this.barras_id} .contenedor-tooltip-svg`).clientWidth - this.margen.derecha - this.margen.izquierda - this.ancho_leyenda_y
       this.alto = this.alto_vis - this.margen.arriba - this.margen.abajo;
 
       this.svg
@@ -214,7 +216,7 @@ export default {
     creandoBarras() {
       this.grupo_contenedor.selectAll(".g-rects").remove();
 
-      this.barras_apiladas = this.grupo_contenedor
+      this.barras_agrupadas = this.grupo_contenedor
           .selectAll(".g-rects")
           .data(this.data_apilada)
           .enter()
@@ -222,7 +224,7 @@ export default {
           .attr("class", (d) => `${d.key} g-rects`)
           .style("fill", (d, i) => this.variables[i].color)
 
-      this.barras_individuales = this.barras_apiladas
+      this.barras_individuales = this.barras_agrupadas
           .selectAll("rect")
           .data((d) => d)
           .enter()
@@ -238,7 +240,6 @@ export default {
 
     },
     actualizandoBarras() {
-      console.log(this.data_apilada)
       this.barras_individuales
           .attr("width", this.escalaXSub.bandwidth)
           .attr("height", d => this.escalaY(d[0]) - this.escalaY(d[1]))
@@ -271,7 +272,7 @@ export default {
               .style("height", "30px")
 
           let contenido_tooltip = this.tooltip.select(".tooltip-contenido")
-              .style("background", "rgba(0, 0, 0,.8)")
+              .style("background", "rgba(34, 33, 0,.8)")
               .style("min-width", this.ancho_tooltip + "px")
               .style("border-radius", "8px")
               .style("width", this.ancho_tooltip + "px")
@@ -311,12 +312,16 @@ svg.svg-barras {
 }
 
 svg.svg-barras::v-deep text {
-  font-family: "Montserrat";
+  font-family: "hiragino-kaku-gothic";
 
 }
-
+.contenedor-barras{
+  overflow-x: auto;
+}
 div.contenedor-tooltip-svg {
   position: relative;
+  overflow-x: scroll;
+  overflow-y: hidden;
 
   .rotation-wrapper-outer {
     display: table;
@@ -363,10 +368,10 @@ div.contenedor-tooltip-svg {
       margin: 3px;
 
       span.nomenclatura-tooltip {
-        width: 10px;
+        width: 20px;
         height: 10px;
-        border-radius: 50%;
-        border: solid 1px rgba(255, 255, 255, .7);
+        border-radius: 2px;
+        border: solid 1px #838270;
         display: inline-block;
       }
     }
@@ -382,7 +387,8 @@ div.contenedor-tooltip-svg {
   }
 
   div.tooltip button.boton-cerrar-tooltip {
-    background: #fff;
+    color:#fff;
+    background: none;
     border: none;
     font-size: 30px;
     line-height: .9;
