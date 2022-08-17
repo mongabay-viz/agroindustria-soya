@@ -1,6 +1,9 @@
 <template>
   <div class="vista-sancionadas">
-    <h2>PÉRDIDA FORESTAL QUE NO SE SANCIONA</h2>
+    <h2>
+      PÉRDIDA FORESTAL QUE NO SE <br class="line-break" />
+      SANCIONA
+    </h2>
     <p class="descripcion">
       Estados en donde la Profepa inició procedimientos por cambio de uso de
       suelo forestal entre 2015 y febrero de 2022.
@@ -110,6 +113,13 @@ export default {
     color: #222100;
     font-size: 18px;
     line-height: 21px;
+
+    .line-break {
+      display: none;
+      @media (max-width: 768px) {
+        display: block;
+      }
+    }
   }
 
   .descripcion {
@@ -150,25 +160,23 @@ export default {
 
   .pie {
     p {
-      height: 22px;
       margin-bottom: 20px;
       display: flex;
       color: #4e4d33;
       font-size: 12px;
       font-weight: 600;
       letter-spacing: 1.07px;
+      line-height: 16px;
       @media (max-width: 768px) {
-        margin-bottom: 20px;
+        margin-bottom: 17px;
       }
 
       span {
-        display: table-cell;
-        vertical-align: middle;
         width: 18px;
         height: 18px;
         border-radius: 4px;
         margin-right: 10px;
-        transform: translate(0, 2px);
+        transform: translate(0, -2px);
       }
     }
   }

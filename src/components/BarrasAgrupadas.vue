@@ -148,6 +148,7 @@ export default {
     this.eje_y = this.grupo_contenedor
       .append("g")
       .attr("class", "eje-y")
+      .style("transform", "translate(4px, 0)")
       .style("color", "#4E4D33")
       .style("font-size", "12px")
       .style("line-height", "20px")
@@ -357,6 +358,7 @@ $border-radius-tarjeta: 10px;
 svg.svg-barras {
   position: absolute;
   top: 0;
+  transform: translate(-17px, 0px);
 }
 
 svg.svg-barras::v-deep text {
@@ -366,8 +368,7 @@ svg.svg-barras::v-deep text {
   overflow-x: auto;
   padding-bottom: 0px;
   margin-top: 16px;
-  padding-left: 5px;
-
+  padding-left: 0px;
   @media (max-width: 768px) {
     margin-top: 10px;
   }
