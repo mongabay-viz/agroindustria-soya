@@ -545,179 +545,181 @@ export default {
 </script>
 
 <style lang="scss">
+.contenedor-barras{
 $border-radius-tarjeta: 10px;
-svg.svg-barras {
-  position: absolute;
-  top: 0;
-  background: #fff;
-}
-
-svg.svg-barras::v-deep text {
-  font-family: "hiragino-kaku-gothic";
-}
-.fuente {
-  color: #222100;
-  font-size: 12px;
-  letter-spacing: 0px;
-  line-height: 16px;
-  @media (max-width: 768px) {
-    font-size: 10px;
-    line-height: 14px;
-  }
-}
-
-.pie {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  @media (max-width: 768px) {
-    justify-content: flex-start;
+  svg.svg-barras {
+    position: absolute;
+    top: 0;
+    background: #fff;
   }
 
-  button {
-    border: none;
-    background: none;
-    border-radius: 0;
+  svg.svg-barras::v-deep text {
+    font-family: "hiragino-kaku-gothic";
+  }
+  .fuente {
+    color: #222100;
+    font-size: 12px;
+    letter-spacing: 0px;
+    line-height: 16px;
     @media (max-width: 768px) {
-      width: 271px;
+      font-size: 10px;
+      line-height: 14px;
     }
-    p {
-      margin: 0px;
-      display: flex;
-      line-height: 2.1;
-      font-size: 12px;
-      padding-left: 10px;
-      color: #4e4d33;
-      letter-spacing: 1.07;
-      text-align: center;
-      //      line-height: 16px;
+  }
 
-      span {
-        position: relative;
-        margin-right: 10px;
-        display: inline-flex;
-        border: solid 1px #000;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        &::before {
-          content: "";
-          position: absolute;
-          top: 0px;
-          left: 0px;
+  .pie {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    @media (max-width: 768px) {
+      justify-content: flex-start;
+    }
+
+    button {
+      border: none;
+      background: none;
+      border-radius: 0;
+      @media (max-width: 768px) {
+        width: 271px;
+      }
+      p {
+        margin: 0px;
+        display: flex;
+        line-height: 2.1;
+        font-size: 12px;
+        padding-left: 10px;
+        color: #4e4d33;
+        letter-spacing: 1.07;
+        text-align: center;
+        //      line-height: 16px;
+
+        span {
+          position: relative;
+          margin-right: 10px;
+          display: inline-flex;
+          border: solid 1px #000;
           width: 30px;
           height: 30px;
           border-radius: 50%;
-          background: #fff;
+          &::before {
+            content: "";
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #fff;
+          }
+        }
+      }
+      &.activo {
+        p span::before {
+          top: 10px;
+          left: 10px;
+          width: 10px;
+          height: 10px;
         }
       }
     }
-    &.activo {
-      p span::before {
-        top: 10px;
-        left: 10px;
-        width: 10px;
-        height: 10px;
-      }
-    }
   }
-}
-div.contenedor-tooltip-svg {
-  position: relative;
-  width: 100%;
-  @media (max-width: 768px) {
-    width: 100%;
-  }
-  overflow-x: scroll;
-  overflow-y: hidden;
-  padding-bottom: 10px;
-
-  .rotation-wrapper-outer {
-    display: table;
-
-    .rotation-wrapper-inner {
-      padding: 50% 0;
-      height: 0;
-
-      .element-to-rotate {
-        display: block;
-        transform-origin: top left;
-        //transform: rotate(-90deg) translate(-100%);
-        margin-top: -50%;
-        font-size: 12px;
-        text-align: center;
-        font-weight: 600;
-      }
-    }
-  }
-
-  div.eje-x {
+  div.contenedor-tooltip-svg {
     position: relative;
     width: 100%;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 1.25px;
-    color: #4e4d33;
-  }
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+    overflow-x: scroll;
+    overflow-y: hidden;
+    padding-bottom: 10px;
 
-  .titulo-eje-y {
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 1.25px;
-    height: 0;
-    color: #4e4d33;
-  }
+    .rotation-wrapper-outer {
+      display: table;
 
-  div.tooltip {
-    color: #ffffff;
-    font-size: 12px;
-    position: absolute;
-    z-index: 2;
-    visibility: hidden;
-  }
+      .rotation-wrapper-inner {
+        padding: 50% 0;
+        height: 0;
 
-  div.tooltip div.tooltip-cifras {
-    padding-bottom: 5px;
-
-    p {
-      margin: 0px;
-      line-height: 1.4;
-      font-size: 16px;
-      span {
-        position: relative;
-        display: inline-block;
+        .element-to-rotate {
+          display: block;
+          transform-origin: top left;
+          //transform: rotate(-90deg) translate(-100%);
+          margin-top: -50%;
+          font-size: 12px;
+          text-align: center;
+          font-weight: 600;
+        }
       }
     }
-  }
 
-  div.tooltip div.contenedor-boton-cerrar {
-    height: auto;
-    display: flex;
-    width: 100%;
-    padding-top: 5px;
-    font-weight: 600;
-  }
-
-  div.tooltip button.boton-cerrar-tooltip {
-    background: #fff;
-    border: none;
-    font-size: 30px;
-    line-height: 0.9;
-    font-weight: 300;
-    padding: 0 5px;
-    border-radius: 5px;
-    margin: 0 0 0 auto;
-    @media (min-width: 768px) {
-      display: none;
+    div.eje-x {
+      position: relative;
+      width: 100%;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1.25px;
+      color: #4e4d33;
     }
-    cursor: pointer;
 
-    img {
-      width: 30px;
-      height: 30px;
-      float: right;
+    .titulo-eje-y {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1.25px;
+      height: 0;
+      color: #4e4d33;
+    }
+
+    div.tooltip {
+      color: #ffffff;
+      font-size: 12px;
+      position: absolute;
+      z-index: 2;
+      visibility: hidden;
+    }
+
+    div.tooltip div.tooltip-cifras {
+      padding-bottom: 5px;
+
+      p {
+        margin: 0px;
+        line-height: 1.4;
+        font-size: 16px;
+        span {
+          position: relative;
+          display: inline-block;
+        }
+      }
+    }
+
+    div.tooltip div.contenedor-boton-cerrar {
+      height: auto;
+      display: flex;
+      width: 100%;
+      padding-top: 5px;
+      font-weight: 600;
+    }
+
+    div.tooltip button.boton-cerrar-tooltip {
+      background: #fff;
+      border: none;
+      font-size: 30px;
+      line-height: 0.9;
+      font-weight: 300;
+      padding: 0 5px;
+      border-radius: 5px;
+      margin: 0 0 0 auto;
+      @media (min-width: 768px) {
+        display: none;
+      }
+      cursor: pointer;
+
+      img {
+        width: 30px;
+        height: 30px;
+        float: right;
+      }
     }
   }
 }

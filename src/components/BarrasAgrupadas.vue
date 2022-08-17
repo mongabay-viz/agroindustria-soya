@@ -23,7 +23,7 @@
             }"
             class="element-to-rotate"
           >
-            <p style="padding: 10px 0 5px 0" v-html="titulo_eje_y"></p>
+            <p style="padding: 0" v-html="titulo_eje_y"></p>
           </div>
         </div>
       </div>

@@ -25,7 +25,7 @@
       :nombre_barra="'AÑO'"
       :nombre_color="'nombre_colores'"
       :alto_vis="360"
-      :margen="{ arriba: 20, abajo: 50, izquierda: 30, derecha: 20 }"
+      :margen="{ arriba: 20, abajo: 50, izquierda: 35, derecha: 20 }"
     >
     </BarrasAgrupadas>
     <div class="pie">
@@ -149,7 +149,15 @@ export default {
   }
 
   .pie {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    @media (max-width: 768px) {
+      justify-content: flex;
+    }
     p {
+      align-content: center;
       height: 22px;
       margin-bottom: 20px;
       display: flex;
@@ -157,10 +165,9 @@ export default {
       font-size: 12px;
       font-weight: 600;
       letter-spacing: 1.07px;
-      @media (max-width: 768px) {
-        margin-bottom: 20px;
-      }
-
+      line-height: 2;
+      
+     
       span {
         display: table-cell;
         vertical-align: middle;
