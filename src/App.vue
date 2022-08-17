@@ -51,6 +51,14 @@ body {
   @media (max-width: 768px) {
     padding: 20px 21px;
   }
+  select {
+    padding-right:20px;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1em;
+  }
 
   .titulo {
     margin: 0;
@@ -166,6 +174,10 @@ body {
     }
     .fuente {
       &.mapa {
+        height: auto;
+        color: #222100;
+        font-size: 10px;
+        line-height: 14px;
         @media (min-width: 768px) {
           display: none;
         }
