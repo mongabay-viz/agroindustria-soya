@@ -3,9 +3,10 @@
     <p class="titulo">
       <span>Aquí el aguacate gana terreno</span> <br />
 
-      En estos municipios del sureste de México, las hectáreas sembradas con
-      aguacate han ido en aumento. En la visualización también es posible
-      conocer cómo ha sido la pérdida de cobertura arbórea en esos territorios.
+      En estos municipios de Jalisco, Michoacán y Estado de México las hectáreas
+      sembradas con aguacate han ido en aumento. En la visualización también es
+      posible conocer cómo ha sido la pérdida de cobertura arbórea en esos
+      territorios.
     </p>
     <p class="municipio">Municipio</p>
     <div class="controles">

@@ -12,7 +12,7 @@ export default {
     if (this.$route.name == "soya") {
       this.$store.commit("modificandoMunicipioSeleccionado", "04006");
     } else if (this.$route.name == "cania") {
-      this.$store.commit("modificandoMunicipioSeleccionado", "23010");
+      this.$store.commit("modificandoMunicipioSeleccionado", "23004");
     } else if (this.$route.name == "palma") {
       this.$store.commit("modificandoMunicipioSeleccionado", "04003");
     } else if (this.$route.name == "aguacate") {

@@ -25,7 +25,7 @@ export default new Vuex.Store({
     /// Caña
     datos_cania: datos_cania,
     nombre_cultivo_cania: "cania",
-    fecha_maxima_cania: 2020,
+    fecha_maxima_cania: 2021,
     fecha_minima_cania: 2010,
     color_cultivo_cania: "#C7C49C",
     base_serie_cania: [],
