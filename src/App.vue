@@ -49,7 +49,8 @@ body {
   margin: 20px auto;
   padding: 0 20px;
   @media (max-width: 768px) {
-    padding: 20px 21px;
+    padding: 0px 21px;
+    margin: 0px auto;
   }
   select {
     padding-right:20px;
@@ -58,6 +59,7 @@ body {
     background-repeat: no-repeat;
     background-position: right 10px center;
     background-size: 1em;
+    
   }
 
   .titulo {
