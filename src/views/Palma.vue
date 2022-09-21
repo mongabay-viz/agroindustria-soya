@@ -1,10 +1,10 @@
 <template>
   <div>
     <p class="titulo">
-      <span>Aquí la soya gana terreno</span> <br />
+      <span>Aquí la palma gana terreno</span> <br />
 
       En estos municipios del sureste de México, las hectáreas sembradas con
-      soya han ido en aumento. En la visualización también es posible conocer
+      palma han ido en aumento. En la visualización también es posible conocer
       cómo ha sido la pérdida de cobertura arbórea en esos territorios.
     </p>
     <p class="municipio">Municipio</p>
@@ -79,7 +79,7 @@ export default {
       geojson: Object,
       data_series: [],
       visible_movil: "grafica",
-      cultivo: "soya",
+      cultivo: "palma",
     };
   },
   methods: {
@@ -95,10 +95,10 @@ export default {
     this.geojson = this.$store.state["datos_" + this.cultivo];
   },
   computed: {
-    ...mapState(["base_serie_soya"]),
+    ...mapState(["base_serie_palma"]),
   },
   watch: {
-    base_serie_soya(nv) {
+    base_serie_palma(nv) {
       this.data_series = nv;
     },
   },
